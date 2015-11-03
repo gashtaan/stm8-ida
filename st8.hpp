@@ -1,5 +1,5 @@
-#ifndef _STM8_HPP
-#define _STM8_HPP
+#ifndef _ST8_HPP
+#define _ST8_HPP
 
 #define NO_OBSOLETE_FUNCS
 
@@ -45,7 +45,12 @@
 #define aux_extd       0x0010  // extended addessing mode
 
 //------------------------------------------------------------------
-enum regnum_t
+#ifdef _MSC_VER
+#define ENUM8BIT : uint8
+#else
+#define ENUM8BIT
+#endif
+enum regnum_t ENUM8BIT
 {
   A, X, Y, CC, SP,
   XL, XH, YL, YH,
@@ -65,15 +70,15 @@ void idaapi footer(void);
 
 void idaapi segstart(ea_t ea);
 void idaapi segend(ea_t ea);
-void assumes(ea_t ea);         // function to produce assume directives
+void idaapi assumes(ea_t ea);         // function to produce assume directives
 
 void idaapi out(void);
-int  outspec(ea_t ea,uchar segtype);
+int  idaapi outspec(ea_t ea,uchar segtype);
 
 int  idaapi ana(void);
 int  idaapi emu(void);
 bool idaapi outop(op_t &op);
-void data(ea_t ea);
+void idaapi data(ea_t ea);
 
 bool idaapi is_switch(switch_info_ex_t *si);
 int  idaapi is_align_insn(ea_t ea);
@@ -88,4 +93,4 @@ int is_jump_func(const func_t *pfn, ea_t *jump_target);
 int is_sane_insn(int nocrefs);
 int may_be_func(void);           // can a function start here?
 
-#endif // _STM8_HPP
+#endif // _ST8_HPP
