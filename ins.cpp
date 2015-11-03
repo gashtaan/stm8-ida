@@ -1,4 +1,4 @@
-#include "stm8.hpp"
+#include "st8.hpp"
 
 instruc_t Instructions[] = {
 	{ "",           0                               },        // Unknown Operation
@@ -39,29 +39,29 @@ instruc_t Instructions[] = {
 	{ "jp",         CF_USE1|CF_STOP|CF_JUMP         },        // Absolute Jump
 	{ "jpf",        CF_USE1|CF_STOP                 },        // Absolute Jump far
 	{ "jra",        CF_USE1|CF_STOP                 },        // Jump relative always
-//	{ "jrt",        CF_USE1|CF_STOP                 },        // Jump relative
+	{ "jrc",        CF_USE1                         },        // Jump if C = 1
+	{ "jreq",       CF_USE1                         },        // Jump if Z = 1 (equal)
 	{ "jrf",        CF_USE1                         },        // Never jump
+	{ "jrh",        CF_USE1                         },        // Jump if H = 1
 	{ "jrih",       CF_USE1                         },        // Jump if Port INT pin = 1
 	{ "jril",       CF_USE1                         },        // Jump if Port INT pin = 0
-	{ "jrh",        CF_USE1                         },        // Jump if H = 1
-	{ "jrnh",       CF_USE1                         },        // Jump if H = 0
 	{ "jrm",        CF_USE1                         },        // Jump if I = 1
-	{ "jrnm",       CF_USE1                         },        // Jump if I = 0
 	{ "jrmi",       CF_USE1                         },        // Jump if N = 1 (minus)
-	{ "jrpl",       CF_USE1                         },        // Jump if N = 0 (plus)
-	{ "jreq",       CF_USE1                         },        // Jump if Z = 1 (equal)
-	{ "jrne",       CF_USE1                         },        // Jump if Z = 0 (not equal)
-	{ "jrc",        CF_USE1                         },        // Jump if C = 1
 	{ "jrnc",       CF_USE1                         },        // Jump if C = 0
+	{ "jrne",       CF_USE1                         },        // Jump if Z = 0 (not equal)
+	{ "jrnh",       CF_USE1                         },        // Jump if H = 0
+	{ "jrnm",       CF_USE1                         },        // Jump if I = 0
 	{ "jrnv",       CF_USE1                         },        // Jump if V = 0
+	{ "jrpl",       CF_USE1                         },        // Jump if N = 0 (plus)
 	{ "jrsge",      CF_USE1                         },
 	{ "jrsgt",      CF_USE1                         },
 	{ "jrsle",      CF_USE1                         },
 	{ "jrslt",      CF_USE1                         },
-	{ "jrult",      CF_USE1                         },        // Jump if C = 1
+	{ "jrt",        CF_USE1|CF_STOP                 },        // Jump relative	
 	{ "jruge",      CF_USE1                         },        // Jump if C = 0
 	{ "jrugt",      CF_USE1                         },        // Jump if (C + Z = 0)
 	{ "jrule",      CF_USE1                         },        // Jump if (C + Z = 1)
+	{ "jrult",      CF_USE1                         },        // Jump if C = 1
 	{ "jrv",        CF_USE1                         },        // Jump if V = 1
 	{ "ld",         CF_CHG1|CF_USE2                 },        // Load
 	{ "ldf",        CF_CHG1|CF_USE2                 },        // Load far
@@ -105,10 +105,10 @@ instruc_t Instructions[] = {
 	{ "tnz",        CF_USE1                         },        // Test for Neg & Zero
 	{ "tnzw",       CF_USE1                         },        // Test for Neg & Zero word
 	{ "trap",       0                               },        // S/W trap
-	{ "unknown",    0                               },        // UNKNOWN 0x71 instruction
 	{ "wfe",        0                               },        // Wait for Event
 	{ "wfi",        0                               },        // Wait for Interrupt
 	{ "xor",        CF_CHG1|CF_USE1|CF_USE2         },        // Exclusive OR
+	{ "unknown",    0                               },        // UNKNOWN 0x71 instruction
 };
 
 char const *insn_auto_cmts[] = {
@@ -149,29 +149,29 @@ char const *insn_auto_cmts[] = {
 	"Absolute Jump",
 	"Absolute Jump far",
 	"Jump relative always",
-//	"Jump relative",
+	"Jump if C = 1",
+	"Jump if Z = 1 (equal)",
 	"Never jump",
+	"Jump if H = 1",
 	"Jump if Port INT pin = 1",
 	"Jump if Port INT pin = 0",
-	"Jump if H = 1",
-	"Jump if H = 0",
 	"Jump if I = 1",
-	"Jump if I = 0",
 	"Jump if N = 1 (minus)",
-	"Jump if N = 0 (plus)",
-	"Jump if Z = 1 (equal)",
-	"Jump if Z = 0 (not equal)",
-	"Jump if C = 1",
 	"Jump if C = 0",
+	"Jump if Z = 0 (not equal)",
+	"Jump if H = 0",
+	"Jump if I = 0",
 	"Jump if V = 0",
+	"Jump if N = 0 (plus)",
 	"",
 	"",
 	"",
 	"",
-	"Jump if C = 1",
+	"Jump relative",
 	"Jump if C = 0",
 	"Jump if (C + Z = 0)",
 	"Jump if (C + Z = 1)",
+	"Jump if C = 1",
 	"Jump if V = 1",
 	"Load",
 	"Load far",
@@ -215,11 +215,11 @@ char const *insn_auto_cmts[] = {
 	"Test for Neg & Zero",
 	"Test for Neg & Zero word",
 	"S/W trap",
-	"UNKNOWN 0x71 instruction",
 	"Wait for Event",
 	"Wait for Interrupt",
-	"Exclusive OR"
+	"Exclusive OR",
+	"UNKNOWN 0x71 instruction",
 };
 
-static_assert(qnumber(Instructions) == STM8_last, "instruction array size mismatch");
-static_assert(qnumber(insn_auto_cmts) == STM8_last, "instruction array size mismatch");
+CASSERT(qnumber(Instructions) == ST8_last);
+CASSERT(qnumber(insn_auto_cmts) == ST8_last);
