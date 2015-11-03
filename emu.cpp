@@ -1,4 +1,4 @@
-#include "stm8.hpp"
+#include "st8.hpp"
 //#include <frame.hpp>
 
 static int flow;
@@ -9,10 +9,10 @@ static void process_immediate_number(int n)
   if ( isDefArg(uFlag,n) ) return;
   switch ( cmd.itype )
   {
-    case STM8_bres:
-    case STM8_bset:
-    case STM8_btjf:
-    case STM8_btjt:
+    case ST8_bres:
+    case ST8_bset:
+    case ST8_btjf:
+    case ST8_btjt:
       op_dec(cmd.ea, n);
       break;
   }
@@ -121,7 +121,7 @@ int may_be_func(void)           // can a function start here?
 //----------------------------------------------------------------------
 int is_sane_insn(int /*nocrefs*/)
 {
-  if ( cmd.itype == STM8_nop )
+  if ( cmd.itype == ST8_nop )
   {
     for ( int i=0; i < 8; i++ )
       if ( get_word(cmd.ea-i*2) != 0 ) return 1;
@@ -171,21 +171,21 @@ public:
 
 	bool jpi0()
 	{
-		bool valid = cmd.itype == STM8_jp;
+		bool valid = cmd.itype == ST8_jp;
 		if (valid)
 			indirect_register = cmd.Op1.reg;
 		return valid;
 	}
 	bool jpi1()
 	{
-		bool valid = cmd.itype == STM8_ldw && cmd.Op1.reg == indirect_register;
+		bool valid = cmd.itype == ST8_ldw && cmd.Op1.reg == indirect_register;
 		if (valid)
 			si.jumps = cmd.Op2.addr;
 		return valid;
 	}
 	bool jpi2()
 	{
-		return cmd.itype == STM8_sllw && cmd.Op1.reg == indirect_register;
+		return cmd.itype == ST8_sllw && cmd.Op1.reg == indirect_register;
 	}
 	bool jpi3()
 	{
@@ -197,15 +197,15 @@ public:
 
 		index_register = cmd.Op2.reg;
 
-		return cmd.itype == STM8_ld;
+		return cmd.itype == ST8_ld;
 	}
 	bool jpi4()
 	{
-		return cmd.itype == STM8_clrw && cmd.Op1.reg == indirect_register;
+		return cmd.itype == ST8_clrw && cmd.Op1.reg == indirect_register;
 	}
 	bool jpi6()
 	{
-		bool valid = cmd.itype == STM8_cp && cmd.Op1.reg == index_register;
+		bool valid = cmd.itype == ST8_cp && cmd.Op1.reg == index_register;
 		if (valid)
 			si.ncases = cmd.Op2.value;
 		return valid;
@@ -235,7 +235,7 @@ int idaapi is_align_insn(ea_t ea)
   if ( !decode_insn(ea) ) return 0;
   switch ( cmd.itype )
   {
-    case STM8_nop:
+    case ST8_nop:
       break;
     default:
       return 0;
