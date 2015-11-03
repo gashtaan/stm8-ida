@@ -1,4 +1,4 @@
-#include "stm8.hpp"
+#include "st8.hpp"
 
 //----------------------------------------------------------------------
 inline void outreg(int r)
@@ -56,7 +56,7 @@ bool idaapi outop(op_t &x)
 // o_displ Short     Direct   Indexed  ld A,($10,X)             00..1FE                + 1
 // o_displ Long      Direct   Indexed  ld A,($1000,X)           0000..FFFF             + 2
       out_symbol('(');
-      OutValue(x, OOFS_IFSIGN|OOF_ADDR|OOFW_IMM);
+      OutValue(x, OOFS_IFSIGN|OOF_ADDR||((cmd.auxpref & aux_16) ? OOFW_16 : OOFW_8));
       out_symbol(',');
       outreg(x.reg);
       out_symbol(')');
@@ -208,12 +208,13 @@ void idaapi segend(ea_t)
 //--------------------------------------------------------------------------
 void idaapi header()
 {
-  gen_cmt_line("Processor       : %-8.8s", inf.procName);
+//D  gen_cmt_line("Processor       : %-8.8s", inf.procName);
 //  gen_cmt_line("Target assembler: %s", ash.name);
 //  gen_cmt_line("Byte sex        : %s", inf.mf ? "Big endian" : "Little endian");
-  if ( ash.header != NULL )
-    for ( char const *const *ptr=ash.header; *ptr != NULL; ptr++ )
-      printf_line(0,COLSTR("%s",SCOLOR_ASMDIR),*ptr);
+  //D if ( ash.header != NULL )
+    //D for ( char const *const *ptr=ash.header; *ptr != NULL; ptr++ )
+      //D printf_line(0,COLSTR("%s",SCOLOR_ASMDIR),*ptr);
+  gen_header(GH_PRINT_PROC | GH_PRINT_HEADER);
   MakeNull();
 }
 
