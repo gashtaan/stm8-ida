@@ -696,7 +696,7 @@ static const opcode_t pre92[] =
 //--------------------------------------------------------------------------
 uint ReadU24(void)
 {
-	ushort value = ua_next_byte() << 16;
+	uint value = ua_next_byte() << 16;
 	value |= ua_next_byte() << 8;
 	value |= ua_next_byte();
 	return value;
