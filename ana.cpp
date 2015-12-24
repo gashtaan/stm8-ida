@@ -62,7 +62,7 @@ static const opcode_t primary[256] =
 {
 	{ST8_neg,0x00,F_SHORTOFFSP,F_NONE,2,0,1},
 	{ST8_rrwa,0x01,F_REGX,F_REGA,1,0,1},
-	{ST8_rlwa,0x02,F_REGX,F_NONE,1,0,1},
+	{ST8_rlwa,0x02,F_REGX,F_REGA,1,0,1},
 	{ST8_cpl,0x03,F_SHORTOFFSP,F_NONE,2,0,1},
 	{ST8_srl,0x04,F_SHORTOFFSP,F_NONE,2,0,1},
 	{ST8_null,0x05,F_NONE,F_NONE,1,0,1},
@@ -674,7 +674,7 @@ static const opcode_t pre92[] =
 	{ST8_jp,0xCC,F_SHORTPTRW_,F_NONE,3,1,1},
 	{ST8_call,0xCD,F_SHORTPTRW_,F_NONE,3,1,1},
 	{ST8_ldw,0xCE,F_REGX,F_SHORTPTRW_,3,1,1},
-	{ST8_ldw,0xCF,F_SHORTPTRW_,F_REGY,3,1,1},
+	{ST8_ldw,0xCF,F_SHORTPTRW_,F_REGX,3,1,1},
 	{ST8_sub,0xD0,F_REGA,F_SHORTPTRWX,3,1,1},
 	{ST8_cp,0xD1,F_REGA,F_SHORTPTRWX,3,1,1},
 	{ST8_sbc,0xD2,F_REGA,F_SHORTPTRWX,3,1,1},
