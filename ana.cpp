@@ -856,7 +856,11 @@ static void opndx(op_t &x, int type, int index)
   if ( index )
   {
     if ( type != ndx_none && (cmd.auxpref & aux_indir) == 0 )
+    {
       x.type = o_displ;
+      if (cmd.auxpref & aux_16)
+        x.dtyp = dt_word;
+    }    
     cmd.auxpref |= aux_index;
     x.reg = index;
   }
@@ -884,7 +888,11 @@ static void oplndx(op_t &x, int type, int index)
   if ( index )
   {
     if ( type != ndx_none && (cmd.auxpref & aux_indir) == 0 )
+    {
       x.type = o_displ;
+      if (cmd.auxpref & aux_16)
+        x.dtyp = dt_word;
+    }    
     cmd.auxpref |= aux_index;
     x.reg = index;
   }
