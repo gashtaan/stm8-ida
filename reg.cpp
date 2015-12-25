@@ -148,6 +148,7 @@ netnode helper;
 
 static int idaapi notify(processor_t::idp_notify msgid, ...)
 {
+  int retcode = 1;
   va_list va;
   va_start(va, msgid);
 
@@ -202,10 +203,19 @@ static int idaapi notify(processor_t::idp_notify msgid, ...)
                                 // 'cmd' structure is filled upon the entrace
                                 // the idp module is allowed to modify 'cmd'
       return may_be_func();
+      
+  	case processor_t::get_autocmt:
+		{
+			char *buf = va_arg(va, char *);
+			size_t bufsize = va_arg(va, size_t);
+			if ( qsnprintf(buf, bufsize, "%s", insn_auto_cmts[cmd.itype]) )
+				retcode = 2;
+		}
+		break;
 
   }
   va_end(va);
-  return 1;
+  return retcode;
 }
 
 //-----------------------------------------------------------------------
