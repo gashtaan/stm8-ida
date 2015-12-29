@@ -96,8 +96,8 @@ static const opcode_t primary[256] =
 	{ST8_jrf,0x21,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jrugt,0x22,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jrule,0x23,F_SHORTJUMP,F_NONE,2,0,1},
-	{ST8_jrnc,0x24,F_SHORTJUMP,F_NONE,2,0,1},
-	{ST8_jrc,0x25,F_SHORTJUMP,F_NONE,2,0,1},
+	{ST8_jrnc,0x24,F_SHORTJUMP,F_NONE,2,0,1},//it can be JRUGE instruction also
+	{ST8_jrc,0x25,F_SHORTJUMP,F_NONE,2,0,1},//it can be JRULT instruction also
 	{ST8_jrne,0x26,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jreq,0x27,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jrnv,0x28,F_SHORTJUMP,F_NONE,2,0,1},
