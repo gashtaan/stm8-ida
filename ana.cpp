@@ -576,7 +576,7 @@ static const opcode_t pre90[] =
 	{ST8_cp,0xF1,F_REGA,F_PARY,2,1,1},
 	{ST8_sbc,0xF2,F_REGA,F_PARY,2,1,1},
 	{ST8_cpw,0xF3,F_REGX,F_PARY,2,1,1},
-	{ST8_and,0xF4,F_REGA,F_PARX,2,1,1},
+	{ST8_and,0xF4,F_REGA,F_PARY,2,1,1},
 	{ST8_bcp,0xF5,F_REGA,F_PARY,2,1,1},
 	{ST8_ld,0xF6,F_REGA,F_PARY,2,1,1},
 	{ST8_ld,0xF7,F_PARY,F_REGA,2,1,1},
