@@ -92,7 +92,7 @@ static const opcode_t primary[256] =
 	{ST8_subw,0x1D,F_REGX,F_WORD,3,0,1},
 	{ST8_ldw,0x1E,F_REGX,F_SHORTOFFSP,2,0,1},
 	{ST8_ldw,0x1F,F_SHORTOFFSP,F_REGX,2,0,1},
-	{ST8_jra,0x20,F_SHORTJUMP,F_NONE,2,0,1},
+	{ST8_jra,0x20,F_SHORTJUMP,F_NONE,2,0,1},//it can be JRT instruction also
 	{ST8_jrf,0x21,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jrugt,0x22,F_SHORTJUMP,F_NONE,2,0,1},
 	{ST8_jrule,0x23,F_SHORTJUMP,F_NONE,2,0,1},
