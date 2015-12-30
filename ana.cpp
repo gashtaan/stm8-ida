@@ -448,7 +448,7 @@ static const opcode_t pre72[] =
 static const opcode_t pre90[] =
 {
 	{ST8_rrwa,0x01,F_REGY,F_REGA,2,1,1},
-	{ST8_rlwa,0x02,F_REGY,F_NONE,2,1,1},
+	{ST8_rlwa,0x02,F_REGY,F_REGA,2,1,1},
 	{ST8_bcpl,0x10,F_LONGMEM,F_NPOS0,4,1,1},
 	{ST8_bccm,0x11,F_LONGMEM,F_NPOS0,4,1,1},
 	{ST8_bcpl,0x12,F_LONGMEM,F_NPOS1,4,1,1},
