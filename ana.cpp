@@ -422,7 +422,7 @@ static const opcode_t pre72[] =
 	{ST8_jp,0xCC,F_LONGPTRW_,F_NONE,4,1,1},
 	{ST8_call,0xCD,F_LONGPTRW_,F_NONE,4,1,1},
 	{ST8_ldw,0xCE,F_REGX,F_LONGPTRW_,4,1,1},
-	{ST8_ldw,0xCF,F_LONGPTRW_,F_REGY,4,1,1},
+	{ST8_ldw,0xCF,F_LONGPTRW_,F_REGX,4,1,1},
 	{ST8_sub,0xD0,F_REGA,F_LONGPTRWX,4,1,1},
 	{ST8_cp,0xD1,F_REGA,F_LONGPTRWX,4,1,1},
 	{ST8_sbc,0xD2,F_REGA,F_LONGPTRWX,4,1,1},
