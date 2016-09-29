@@ -53,14 +53,14 @@ instruc_t Instructions[] = {
 	{ "jrnm",       CF_USE1                         },        // Jump if I = 0
 	{ "jrnv",       CF_USE1                         },        // Jump if V = 0
 	{ "jrpl",       CF_USE1                         },        // Jump if N = 0 (plus)
-	{ "jrsge",      CF_USE1                         },
-	{ "jrsgt",      CF_USE1                         },
-	{ "jrsle",      CF_USE1                         },
-	{ "jrslt",      CF_USE1                         },
+	{ "jrsge",      CF_USE1                         },        // Jump if (N XOR V) = 0
+	{ "jrsgt",      CF_USE1                         },        // Jump if (Z = 0 and (N XOR V) = 0)
+	{ "jrsle",      CF_USE1                         },        // Jump if (Z = 1 or (N XOR V) = 1)
+	{ "jrslt",      CF_USE1                         },        // Jump if (N XOR V) = 1
 	{ "jrt",        CF_USE1|CF_STOP                 },        // Jump relative	
 	{ "jruge",      CF_USE1                         },        // Jump if C = 0
-	{ "jrugt",      CF_USE1                         },        // Jump if (C + Z = 0)
-	{ "jrule",      CF_USE1                         },        // Jump if (C + Z = 1)
+	{ "jrugt",      CF_USE1                         },        // Jump if (C = 0 and Z = 0)
+	{ "jrule",      CF_USE1                         },        // Jump if (C = 1 or Z = 1)
 	{ "jrult",      CF_USE1                         },        // Jump if C = 1
 	{ "jrv",        CF_USE1                         },        // Jump if V = 1
 	{ "ld",         CF_CHG1|CF_USE2                 },        // Load
@@ -163,14 +163,14 @@ char const *insn_auto_cmts[] = {
 	"Jump if I = 0",
 	"Jump if V = 0",
 	"Jump if N = 0 (plus)",
-	"",
-	"",
-	"",
-	"",
+	"Jump if (N XOR V) = 0",
+	"Jump if (Z = 0 and (N XOR V) = 0)",
+	"Jump if (Z = 1 or (N XOR V) = 1)",
+	"Jump if (N XOR V) = 1",
 	"Jump relative",
 	"Jump if C = 0",
-	"Jump if (C + Z = 0)",
-	"Jump if (C + Z = 1)",
+	"Jump if (C = 0 and Z = 0)",
+	"Jump if (C = 1 or Z = 1)",
 	"Jump if C = 1",
 	"Jump if V = 1",
 	"Load",
