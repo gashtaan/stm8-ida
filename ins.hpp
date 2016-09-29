@@ -58,14 +58,14 @@ enum nameNum
 	ST8_jrnm,       // Jump if I = 0
 	ST8_jrnv,        // Jump if V = 0
 	ST8_jrpl,       // Jump if N = 0 (plus)
-	ST8_jrsge,
-	ST8_jrsgt,
-	ST8_jrsle,
-	ST8_jrslt,
+	ST8_jrsge,      // Jump if (N XOR V) = 0
+	ST8_jrsgt,      // Jump if (Z = 0 and (N XOR V) = 0)
+	ST8_jrsle,      // Jump if (Z = 1 or (N XOR V) = 1)
+	ST8_jrslt,      // Jump if (N XOR V) = 1
 	ST8_jrt,       // Jump relative
 	ST8_jruge,       // Jump if C = 0
-	ST8_jrugt,       // Jump if (C + Z = 0)
-	ST8_jrule,       // Jump if (C + Z = 1)
+	ST8_jrugt,       // Jump if (C = 0 and Z = 0)
+	ST8_jrule,       // Jump if (C = 1 or Z = 1)
 	ST8_jrult,       // Jump if C = 1
 	ST8_jrv,        // Jump if V = 1
 	ST8_ld,       // Load
