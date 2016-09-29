@@ -221,8 +221,8 @@ void idaapi header()
 //--------------------------------------------------------------------------
 void idaapi footer()
 {
-  char name[MAXSTR];
-  get_colored_name(BADADDR, inf.beginEA, name, sizeof(name));
+  qstring nbuf = get_colored_name(inf.beginEA);
+  const char *name = nbuf.c_str();
   const char *end = ash.end;
   if ( end == NULL )
     printf_line(inf.indent,COLSTR("%s end %s",SCOLOR_AUTOCMT), ash.cmnt, name);
