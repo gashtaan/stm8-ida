@@ -39,30 +39,30 @@ instruc_t Instructions[] = {
 	{ "jp",         CF_USE1|CF_STOP|CF_JUMP         },        // Absolute Jump
 	{ "jpf",        CF_USE1|CF_STOP                 },        // Absolute Jump far
 	{ "jra",        CF_USE1|CF_STOP                 },        // Jump relative always
-	{ "jrc",        CF_USE1                         },        // Jump if C = 1
-	{ "jreq",       CF_USE1                         },        // Jump if Z = 1 (equal)
+	{ "jrc",        CF_USE1                         },        // Jump if carry < (C = 1)
+	{ "jreq",       CF_USE1                         },        // Jump if equal = (Z = 1)
 	{ "jrf",        CF_USE1                         },        // Never jump
-	{ "jrh",        CF_USE1                         },        // Jump if H = 1
+	{ "jrh",        CF_USE1                         },        // Jump if half-carry (H = 1)
 	{ "jrih",       CF_USE1                         },        // Jump if Port INT pin = 1
 	{ "jril",       CF_USE1                         },        // Jump if Port INT pin = 0
-	{ "jrm",        CF_USE1                         },        // Jump if I = 1
-	{ "jrmi",       CF_USE1                         },        // Jump if N = 1 (minus)
-	{ "jrnc",       CF_USE1                         },        // Jump if C = 0
-	{ "jrne",       CF_USE1                         },        // Jump if Z = 0 (not equal)
-	{ "jrnh",       CF_USE1                         },        // Jump if H = 0
-	{ "jrnm",       CF_USE1                         },        // Jump if I = 0
-	{ "jrnv",       CF_USE1                         },        // Jump if V = 0
-	{ "jrpl",       CF_USE1                         },        // Jump if N = 0 (plus)
-	{ "jrsge",      CF_USE1                         },        // Jump if (N XOR V) = 0
-	{ "jrsgt",      CF_USE1                         },        // Jump if (Z = 0 and (N XOR V) = 0)
-	{ "jrsle",      CF_USE1                         },        // Jump if (Z = 1 or (N XOR V) = 1)
-	{ "jrslt",      CF_USE1                         },        // Jump if (N XOR V) = 1
+	{ "jrm",        CF_USE1                         },        // Jump if interrupt mask (I = 1)
+	{ "jrmi",       CF_USE1                         },        // Jump if minus <0 (N = 1)
+	{ "jrnc",       CF_USE1                         },        // Jump if not carry >= (C = 0)
+	{ "jrne",       CF_USE1                         },        // Jump if not equal !=0 (Z = 0)
+	{ "jrnh",       CF_USE1                         },        // Jump if not half-carry (H = 0)
+	{ "jrnm",       CF_USE1                         },        // Jump if not interrupt mask (I = 0)
+	{ "jrnv",       CF_USE1                         },        // Jump if not overflow (V = 0)
+	{ "jrpl",       CF_USE1                         },        // Jump if plus >=0 (N = 0)
+	{ "jrsge",      CF_USE1                         },        // Jump if signed greater or equal >= ((N XOR V) = 0)
+	{ "jrsgt",      CF_USE1                         },        // Jump if signed greater > (Z = 0 and (N XOR V) = 0)
+	{ "jrsle",      CF_USE1                         },        // Jump if signed lower or equal <= (Z = 1 or (N XOR V) = 1)
+	{ "jrslt",      CF_USE1                         },        // Jump if signed lower < ((N XOR V) = 1)
 	{ "jrt",        CF_USE1|CF_STOP                 },        // Jump relative	
-	{ "jruge",      CF_USE1                         },        // Jump if C = 0
-	{ "jrugt",      CF_USE1                         },        // Jump if (C = 0 and Z = 0)
-	{ "jrule",      CF_USE1                         },        // Jump if (C = 1 or Z = 1)
-	{ "jrult",      CF_USE1                         },        // Jump if C = 1
-	{ "jrv",        CF_USE1                         },        // Jump if V = 1
+	{ "jruge",      CF_USE1                         },        // Jump if unsigned greater or equal >= (C = 0)
+	{ "jrugt",      CF_USE1                         },        // Jump if unsigned greater > (C = 0 and Z = 0)
+	{ "jrule",      CF_USE1                         },        // Jump if unsigned lower or equal <= (C = 1 or Z = 1)
+	{ "jrult",      CF_USE1                         },        // Jump if unsigned lower < (C = 1)
+	{ "jrv",        CF_USE1                         },        // Jump if overflow (V = 1)
 	{ "ld",         CF_CHG1|CF_USE2                 },        // Load
 	{ "ldf",        CF_CHG1|CF_USE2                 },        // Load far
 	{ "ldw",        CF_CHG1|CF_USE2                 },        // Load word
