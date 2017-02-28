@@ -44,30 +44,30 @@ enum nameNum
 	ST8_jp,       // Absolute Jump
 	ST8_jpf,       // Absolute Jump far
 	ST8_jra,       // Jump relative always
-	ST8_jrc,       // Jump if C = 1
-	ST8_jreq,       // Jump if Z = 1 (equal)
+	ST8_jrc,       // Jump if carry < (C = 1)
+	ST8_jreq,       // Jump if equal = (Z = 1)
 	ST8_jrf,       // Never jump
-	ST8_jrh,       // Jump if H = 1
+	ST8_jrh,       // Jump if half-carry (H = 1)
 	ST8_jrih,       // Jump if Port INT pin = 1
 	ST8_jril,       // Jump if Port INT pin = 0
-	ST8_jrm,       // Jump if I = 1
-	ST8_jrmi,       // Jump if N = 1 (minus)
-	ST8_jrnc,       // Jump if C = 0
-	ST8_jrne,       // Jump if Z = 0 (not equal)
-	ST8_jrnh,       // Jump if H = 0
-	ST8_jrnm,       // Jump if I = 0
-	ST8_jrnv,        // Jump if V = 0
-	ST8_jrpl,       // Jump if N = 0 (plus)
-	ST8_jrsge,      // Jump if (N XOR V) = 0
-	ST8_jrsgt,      // Jump if (Z = 0 and (N XOR V) = 0)
-	ST8_jrsle,      // Jump if (Z = 1 or (N XOR V) = 1)
-	ST8_jrslt,      // Jump if (N XOR V) = 1
+	ST8_jrm,       // Jump if interrupt mask (I = 1)
+	ST8_jrmi,       // Jump if minus <0 (N = 1)
+	ST8_jrnc,       // Jump if not carry >= (C = 0)
+	ST8_jrne,       // Jump if not equal !=0 (Z = 0)
+	ST8_jrnh,       // Jump if not half-carry (H = 0)
+	ST8_jrnm,       // Jump if not interrupt mask (I = 0)
+	ST8_jrnv,        // Jump if not overflow (V = 0)
+	ST8_jrpl,       // Jump if plus >=0 (N = 0)
+	ST8_jrsge,      // Jump if signed greater or equal >= ((N XOR V) = 0)
+	ST8_jrsgt,      // Jump if signed greater > (Z = 0 and (N XOR V) = 0)
+	ST8_jrsle,      // Jump if signed lower or equal <= (Z = 1 or (N XOR V) = 1)
+	ST8_jrslt,      // Jump if signed lower < ((N XOR V) = 1)
 	ST8_jrt,       // Jump relative
-	ST8_jruge,       // Jump if C = 0
-	ST8_jrugt,       // Jump if (C = 0 and Z = 0)
-	ST8_jrule,       // Jump if (C = 1 or Z = 1)
-	ST8_jrult,       // Jump if C = 1
-	ST8_jrv,        // Jump if V = 1
+	ST8_jruge,       // Jump if unsigned greater or equal >= (C = 0)
+	ST8_jrugt,       // Jump if unsigned greater > (C = 0 and Z = 0)
+	ST8_jrule,       // Jump if unsigned lower or equal <= (C = 1 or Z = 1)
+	ST8_jrult,       // Jump if unsigned lower < (C = 1)
+	ST8_jrv,        // Jump if overflow (V = 1)
 	ST8_ld,       // Load
 	ST8_ldf,       // Load far
 	ST8_ldw,       // Load word
