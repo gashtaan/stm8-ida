@@ -2,6 +2,7 @@
 #include <fpro.h>
 #include <diskio.hpp>
 #include <entry.hpp>
+#include <ieee.h>
 
 //--------------------------------------------------------------------------
 static const char *register_names[] =
@@ -59,8 +60,8 @@ static asm_t stasm =
   "dc.l",       // double words
   NULL,         // qwords
   NULL,         // oword  (16 bytes)
-  NULL,         // float  (4 bytes)
-  NULL,         // double (8 bytes)
+  "dc.flt",     // float  (4 bytes)	// Fake directive, but float available
+  "dc.dbl",     // double (8 bytes)
   NULL,         // tbyte  (10/12 bytes)
   NULL,         // packed decimal real
   "skip#s( )#d, #v", // arrays (#h,#d,#v,#s(...)  ONLY BYTE ARRAYS!!!
@@ -285,7 +286,7 @@ processor_t LPH =
   NULL,                 // int  (*is_far_jump)(int icode);
   NULL,                 // Translation function for offsets
   0,                    // int tbyte_size;  -- doesn't exist
-  NULL,                 // int (*realcvt)(void *m, ushort *e, ushort swt);
+  ieee_realcvt,         // int (*realcvt)(void *m, ushort *e, ushort swt);
   { 0, 7, 15, 0 },      // char real_width[4];
                         // number of symbols after decimal point
                         // 2byte float (0-does not exist)
