@@ -3,6 +3,6 @@ STM8 ida 6.8 processor module
 
 Support for STMicroelectronics' STM8 series of microcontrollers
 
-Добавлена поддержка Float и Double
-Добавлен	STM8S103F3
-Добавлен	STM8L15xR8
+Р”РѕР±Р°РІР»РµРЅР° РїРѕРґРґРµСЂР¶РєР° Float Рё Double
+Р”РѕР±Р°РІР»РµРЅ	STM8S103F3
+Р”РѕР±Р°РІР»РµРЅ	STM8L15xR8
