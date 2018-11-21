@@ -52,8 +52,8 @@ static asm_t cosmic =
   "dc.l",       // double words
   NULL,         // qwords
   NULL,         // oword  (16 bytes)
-  NULL,         // float  (4 bytes)
-  NULL,         // double (8 bytes)
+  "dc.flt",     // float  (4 bytes)	// Fake directive, but float available
+  "dc.dbl",     // double (8 bytes)
   NULL,         // tbyte  (10/12 bytes)
   NULL,         // packed decimal real
   "dcb.#s(b,w,l) #d, #v", // arrays (#h,#d,#v,#s(...)
