@@ -22,6 +22,81 @@ static bytes_t retcodes[] =
  { 0, NULL }
 };
 
+static const uint16 cos_bad_insns[] = { ST8_int, 0 }; //casmst8 doesn't support int
+
+static asm_t cosmic =
+{
+  ASH_HEXF3|    // 0x1234
+  ASD_DECF0|    // 1234
+  ASB_BINF2|    // %1010
+  ASO_OCTF3|    // @1234
+  AS_NOXRF|     // Disable xrefs during the output file generation
+  AS_ONEDUP|   // one array definition per line
+  AS_COLON,    // data labels with colon
+  ASM_COSMIC,
+  "Cosmic CASTM8",
+  0,
+  NULL,   // header lines
+  cos_bad_insns, // bad instructions
+  "org",        // org
+  "end",        // end
+
+  ";",          // comment string
+  '\"',         // string delimiter
+  '\'',         // char delimiter
+  "'\"",        // special symbols in char and string constants
+
+  "dc.b",       // ascii string directive
+  "dc.b",       // byte directive
+  "dc.w",       // word directive
+  "dc.l",       // double words
+  NULL,         // qwords
+  NULL,         // oword  (16 bytes)
+  NULL,         // float  (4 bytes)
+  NULL,         // double (8 bytes)
+  NULL,         // tbyte  (10/12 bytes)
+  NULL,         // packed decimal real
+  "dcb.#s(b,w,l) #d, #v", // arrays (#h,#d,#v,#s(...)
+  "ds.b %s",    // uninited arrays
+  "equ",        // equ
+  NULL,         // 'seg' prefix (example: push seg seg001)
+  NULL,         // Pointer to checkarg_preline() function.
+  NULL,         // char *(*checkarg_atomprefix)(char *operand,void *res); // if !NULL, is called before each atom
+  NULL,         // const char **checkarg_operations;
+  NULL,         // translation to use in character and string constants.
+  "*",          // current IP (instruction pointer)
+  NULL,         // func_header
+  NULL,         // func_footer
+  "xdef",     // "public" name keyword
+  "wdef",         // "weak"   name keyword
+  "xref",     // "extrn"  name keyword
+                // .extern directive requires an explicit object size
+  NULL,         // "comm" (communal variable)
+  NULL,         // get_type_name
+  "align",         // "align" keyword
+  //'(', ')',     // lbrace, rbrace
+  NULL, NULL,
+  "%",         // mod
+  "&",        // and
+  "|",         // or
+  "^",        // xor
+  "~",         // not
+  "<<",        // shl
+  ">>",        // shr
+  NULL,         // sizeof
+  NULL,
+  NULL, //cmnt2
+  "low(%s)", //low8
+  "high(%s)", //high8
+  NULL, //low16
+  NULL, //high16
+  "include \"%s\"", //include
+  NULL, //verbose struct
+  NULL, //3byte
+  NULL, //rva
+  NULL, //yword
+};
+
 //-----------------------------------------------------------------------
 //      STMicroelectronics - Assembler - rel. 4.10
 //      We support Motorola format
@@ -94,7 +169,7 @@ static asm_t stasm =
   AS2_BRACE,
 };
 
-static asm_t *asms[] = { &stasm, NULL };
+static asm_t *asms[] = { &stasm, &cosmic, NULL };
 
 //--------------------------------------------------------------------------
 ea_t memstart;
@@ -299,7 +374,7 @@ processor_t LPH =
   NULL,                 // int (*is_sp_based)(op_t &x);
   NULL,                 // int (*create_func_frame)(func_t *pfn);
   NULL,                 // int (*get_frame_retsize(func_t *pfn)
-  NULL,                 // void (*gen_stkvar_def)(char *buf,const member_t *mptr,int32 v);
+  gen_stkvar_def,                 // void (*gen_stkvar_def)(char *buf,const member_t *mptr,int32 v);
   gen_spcdef,           // Generate text representation of an item in a special segment
   ST8_ret,              // Icode of return instruction. It is ok to give any of possible return instructions
   set_idp_options,      // const char *(*set_idp_options)(const char *keyword,int value_type,const void *value);

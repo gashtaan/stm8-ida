@@ -80,7 +80,7 @@ static void process_operand(op_t &x, bool isload)
 //----------------------------------------------------------------------
 int idaapi emu(void)
 {
-  uint32_t Feature = cmd.get_canon_feature();
+  uint32 Feature = cmd.get_canon_feature();
 
   flow = ((Feature & CF_STOP) == 0);
 

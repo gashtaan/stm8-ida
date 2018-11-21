@@ -1,4 +1,6 @@
 #include "st8.hpp"
+#include <struct.hpp>
+#include <kernwin.hpp>
 
 //----------------------------------------------------------------------
 inline void outreg(int r)
@@ -145,6 +147,7 @@ void idaapi segstart(ea_t ea)
   segment_t *Sarea = getseg(ea);
   if ( is_spec_segm(Sarea->type) ) return;
 
+  char *ptr;
   const char *align;
   switch ( Sarea->align )
   {
@@ -169,17 +172,6 @@ void idaapi segstart(ea_t ea)
   get_true_segm_name(Sarea, sname, sizeof(sname));
   get_segm_class(Sarea, sclas, sizeof(sclas));
 
-  char *ptr = buf + qsnprintf(buf, sizeof(buf),
-                              SCOLOR_ON SCOLOR_ASMDIR "%-*s segment %s ",
-                              inf.indent-1,
-                              sname,
-                              align);
-  if ( Sarea->align == saAbs )
-  {
-    ea_t absbase = get_segm_base(Sarea);
-    ptr += btoa(ptr, end-ptr, absbase);
-    APPCHAR(ptr, end, ' ');
-  }
   const char *comb;
   switch ( Sarea->comb )
   {
@@ -195,14 +187,108 @@ void idaapi segstart(ea_t ea)
                  get_segment_combination(Sarea->comb));
     comb = "";
   }
-  ptr += qsnprintf(ptr, end-ptr, "%s '%s'", comb, sclas);
+
+  if (ash.uflag==ASM_COSMIC)
+  {
+	if (strieq(sclas, "code"))
+	{
+		qstrncpy(sclas, ".text", sizeof(sclas));
+	}
+	else if (strieq(sclas, "data"))
+	{
+		qstrncpy(sclas, ".data", sizeof(sclas));
+	}
+	else if (strieq(sclas, "bss"))
+	{
+		qstrncpy(sclas, ".bss", sizeof(sclas));
+	}
+			  	
+    ptr = buf + qsnprintf(buf, sizeof(buf),
+                                SCOLOR_ON SCOLOR_ASMDIR "%s: section",
+                                sname);
+
+    bool has_attr = false;
+	if (!streq(sclas, ""))
+	{
+  		ptr += qsnprintf(ptr, end-ptr, " %s", sclas);
+  		has_attr = true;
+	}
+
+    if (Sarea->align == saAbs)
+    {
+      if (has_attr)
+      {
+      	APPEND(ptr, end, ",");
+      }
+      APPEND(ptr, end, " abs");
+    }
+  }
+  else
+  {
+    ptr = buf + qsnprintf(buf, sizeof(buf),
+                                SCOLOR_ON SCOLOR_ASMDIR "%-*s segment %s ",
+                                inf.indent-1,
+                                sname,
+                                align);
+    if ( Sarea->align == saAbs )
+    {
+      ea_t absbase = get_segm_base(Sarea);
+      ptr += btoa(ptr, end-ptr, absbase);
+      APPCHAR(ptr, end, ' ');
+    }
+	  ptr += qsnprintf(ptr, end-ptr, "%s '%s'", comb, sclas);
+  }
+
   tag_off(ptr, end, COLOR_ASMDIR);
   MakeLine(buf, 0);
+
+	if (Sarea->align == saAbs)
+	{
+    	ptr = buf + qsnprintf(buf, sizeof(buf),
+                 SCOLOR_ON SCOLOR_ASMDIR "org 0x%x",
+                 Sarea->startEA);
+		tag_off(ptr, end, COLOR_ASMDIR);
+		MakeLine(buf, 0);
+	}
 }
 
 //--------------------------------------------------------------------------
 void idaapi segend(ea_t)
 {
+}
+
+//--------------------------------------------------------------------------
+//  Generate stack variable definition line
+void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval_t v)
+{
+  char sign = ' ';
+  if ( v < 0 )
+  {
+    v = -v;
+    sign = '-';
+  }
+
+  char num[MAX_NUMBUF];
+  btoa(num, sizeof(num), v);
+
+  qstring name = get_member_name2(mptr->id);
+  if (ash.uflag==ASM_COSMIC)
+  {
+    qsnprintf(buf, bufsize,
+              COLSTR("%s", SCOLOR_LOCNAME)
+              COLSTR(": ", SCOLOR_SYMBOL)
+              COLSTR("set", SCOLOR_ASMDIR)
+              COLSTR(" %c", SCOLOR_SYMBOL)
+              COLSTR("%s", SCOLOR_DNUM),
+              name.c_str(), sign, num);
+  }
+  else
+  {
+    qsnprintf(buf, bufsize,
+              COLSTR("%-*s", SCOLOR_LOCNAME)
+              COLSTR("= %c", SCOLOR_SYMBOL)
+              COLSTR("%s", SCOLOR_DNUM), inf.indent, name.c_str(), sign, num);
+  }
 }
 
 //--------------------------------------------------------------------------

@@ -755,7 +755,7 @@ inline void opextmem(op_t &x, char dtyp)
   x.type = o_mem;
   x.dtyp = dtyp;
   x.offb = (char)cmd.size;
-  uint32_t value = ua_next_byte() << 16;
+  uint32 value = ua_next_byte() << 16;
   value |= ua_next_byte() << 8;
   value |= ua_next_byte();
   x.addr = value;
@@ -773,12 +773,12 @@ inline void opmem(op_t &x, char dtyp)
 inline void opaddr(op_t &x, char dtyp)
 {
 
-  uint32_t value = ReadU16();
+  uint32 value = ReadU16();
   x.type = o_near;
   x.dtyp = dtyp;
   x.addr = value;
 }
-inline void opimm(op_t &x, uint32_t value, char dtyp)
+inline void opimm(op_t &x, uint32 value, char dtyp)
 {
   x.type = o_imm;
   x.dtyp = dtyp;

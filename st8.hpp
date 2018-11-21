@@ -5,7 +5,6 @@
 
 #include <idaidp.hpp>
 #include <diskio.hpp>
-#include <cstdint>
 #include "ins.hpp"
 
 // o_void  Inherent      nop
@@ -58,6 +57,13 @@ enum regnum_t ENUM8BIT
 };
 
 //------------------------------------------------------------------
+enum
+{
+	ASM_STASM,
+	ASM_COSMIC
+};
+
+//------------------------------------------------------------------
 extern netnode helper;
 
 ea_t calc_mem(ea_t ea);         // map virtual to physical ea
@@ -71,6 +77,7 @@ void idaapi footer(void);
 void idaapi segstart(ea_t ea);
 void idaapi segend(ea_t ea);
 void idaapi assumes(ea_t ea);         // function to produce assume directives
+void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval_t v);
 
 void idaapi out(void);
 int  idaapi outspec(ea_t ea,uchar segtype);
