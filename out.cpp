@@ -267,11 +267,11 @@ void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval
     v = -v;
     sign = '-';
   }
-
+  char name[MAX_NUMBUF];
   char num[MAX_NUMBUF];
   btoa(num, sizeof(num), v);
 
-  qstring name = get_member_name2(mptr->id);
+  get_member_name(mptr->id, name, sizeof(name));
   if (ash.uflag==ASM_COSMIC)
   {
     qsnprintf(buf, bufsize,
@@ -280,14 +280,14 @@ void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval
               COLSTR("set", SCOLOR_ASMDIR)
               COLSTR(" %c", SCOLOR_SYMBOL)
               COLSTR("%s", SCOLOR_DNUM),
-              name.c_str(), sign, num);
+              name, sign, num);
   }
   else
   {
     qsnprintf(buf, bufsize,
               COLSTR("%-*s", SCOLOR_LOCNAME)
               COLSTR("= %c", SCOLOR_SYMBOL)
-              COLSTR("%s", SCOLOR_DNUM), inf.indent, name.c_str(), sign, num);
+              COLSTR("%s", SCOLOR_DNUM), inf.indent, name, sign, num);
   }
 }
 
@@ -307,8 +307,9 @@ void idaapi header()
 //--------------------------------------------------------------------------
 void idaapi footer()
 {
-  qstring nbuf = get_colored_name(inf.beginEA);
-  const char *name = nbuf.c_str();
+  char name[MAX_NUMBUF];
+  get_colored_name(BADADDR, inf.beginEA, name, sizeof(name));
+  //const char *name = nbuf.c_str();
   const char *end = ash.end;
   if ( end == NULL )
     printf_line(inf.indent,COLSTR("%s end %s",SCOLOR_AUTOCMT), ash.cmnt, name);
