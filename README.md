@@ -1,10 +1,8 @@
 # Stm8Ida
-STM8 ida 6.8 processor module
+STM8 ida 6.6 processor module
 
 Support for STMicroelectronics' STM8 series of microcontrollers
 
-Добавлена поддержка Float и Double
-Добавлен	STM8S103F3
-Добавлен	STM8L15xR8
-
-Added Cosmic CASTM8 assembler
+Fork changes:
+- Added definition for STM8S005K6.
+- Downgraded needed ida SDK version to 6.6.
