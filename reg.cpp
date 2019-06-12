@@ -26,18 +26,17 @@ static const uint16 cos_bad_insns[] = { ST8_int, 0 }; //casmst8 doesn't support 
 
 static asm_t cosmic =
 {
-  ASH_HEXF3|    // 0x1234
-  ASD_DECF0|    // 1234
-  ASB_BINF2|    // %1010
-  ASO_OCTF3|    // @1234
-  AS_NOXRF|     // Disable xrefs during the output file generation
-  AS_ONEDUP|   // one array definition per line
-  AS_COLON,    // data labels with colon
-  ASM_COSMIC,
+  ASH_HEXF3 |    // 0x1234
+  ASD_DECF0 |    // 1234
+  ASB_BINF2 |    // %1010
+  ASO_OCTF3 |    // @1234
+  AS_NOXRF |     // Disable xrefs during the output file generation
+  AS_ONEDUP |    // one array definition per line
+  AS_COLON,      // data labels with colon
+  ASM_COSMIC,	 // uflag,
   "Cosmic CASTM8",
   0,
   NULL,   // header lines
-  cos_bad_insns, // bad instructions
   "org",        // org
   "end",        // end
 
@@ -46,7 +45,8 @@ static asm_t cosmic =
   '\'',         // char delimiter
   "'\"",        // special symbols in char and string constants
 
-  "dc.b",       // ascii string directive
+  // Data representation (db,dw,...):
+  "dc.b",       //   // Data representation (db,dw,...):
   "dc.b",       // byte directive
   "dc.w",       // word directive
   "dc.l",       // double words
@@ -54,28 +54,26 @@ static asm_t cosmic =
   NULL,         // oword  (16 bytes)
   "dc.flt",     // float  (4 bytes)	// Fake directive, but float available
   "dc.dbl",     // double (8 bytes)
-  NULL,         // tbyte  (10/12 bytes)
+  NULL,         // tbyte  (10/12 bytes)  long double;
   NULL,         // packed decimal real
   "dcb.#s(b,w,l) #d, #v", // arrays (#h,#d,#v,#s(...)
   "ds.b %s",    // uninited arrays
   "equ",        // equ
   NULL,         // 'seg' prefix (example: push seg seg001)
-  NULL,         // Pointer to checkarg_preline() function.
-  NULL,         // char *(*checkarg_atomprefix)(char *operand,void *res); // if !NULL, is called before each atom
-  NULL,         // const char **checkarg_operations;
-  NULL,         // translation to use in character and string constants.
   "*",          // current IP (instruction pointer)
+
   NULL,         // func_header
   NULL,         // func_footer
+  
   "xdef",     // "public" name keyword
   "wdef",         // "weak"   name keyword
   "xref",     // "extrn"  name keyword
-                // .extern directive requires an explicit object size
+				// .extern directive requires an explicit object size
   NULL,         // "comm" (communal variable)
+  
   NULL,         // get_type_name
   "align",         // "align" keyword
-  //'(', ')',     // lbrace, rbrace
-  NULL, NULL,
+  '{', '}',     // lbrace, rbrace
   "%",         // mod
   "&",        // and
   "|",         // or
@@ -84,7 +82,7 @@ static asm_t cosmic =
   "<<",        // shl
   ">>",        // shr
   NULL,         // sizeof
-  NULL,
+  AS2_BRACE,
   NULL, //cmnt2
   "low(%s)", //low8
   "high(%s)", //high8
@@ -92,7 +90,6 @@ static asm_t cosmic =
   NULL, //high16
   "include \"%s\"", //include
   NULL, //verbose struct
-  NULL, //3byte
   NULL, //rva
   NULL, //yword
 };
@@ -103,24 +100,23 @@ static asm_t cosmic =
 //-----------------------------------------------------------------------
 static const char *st8_header[] =
 {
-  "st8/",
-  "",
-  NULL
+	"STM8",
+	"",
+	NULL
 };
 
 static asm_t stasm =
 {
-  ASH_HEXF4|    // $1234
-  ASD_DECF0|    // 1234
-  ASB_BINF2|    // %1010
-  ASO_OCTF6|    // ~1234
-  AS_NOXRF|     // Disable xrefs during the output file generation
+  ASH_HEXF4 |    // $1234
+  ASD_DECF0 |    // 1234
+  ASB_BINF2 |    // %1010
+  ASO_OCTF6 |    // ~1234
+  AS_NOXRF |     // Disable xrefs during the output file generation
   AS_ONEDUP,    // one array definition per line
   0,
   "STMicroelectronics - Assembler",
   0,
   st8_header,   // header lines
-  NULL,         // no bad instructions
   "org",        // org
   "end",        // end
 
@@ -129,6 +125,7 @@ static asm_t stasm =
   '\'',         // char delimiter
   "'\"",        // special symbols in char and string constants
 
+  // Data representation (db,dw,...):
   "dc.b",       // ascii string directive
   "dc.b",       // byte directive
   "dc.w",       // word directive
@@ -143,17 +140,13 @@ static asm_t stasm =
   "ds.b %s",    // uninited arrays
   "equ",        // equ
   NULL,         // 'seg' prefix (example: push seg seg001)
-  NULL,         // Pointer to checkarg_preline() function.
-  NULL,         // char *(*checkarg_atomprefix)(char *operand,void *res); // if !NULL, is called before each atom
-  NULL,         // const char **checkarg_operations;
-  NULL,         // translation to use in character and string constants.
   "*",          // current IP (instruction pointer)
   NULL,         // func_header
   NULL,         // func_footer
   "public",     // "public" name keyword
   NULL,         // "weak"   name keyword
   "extern",     // "extrn"  name keyword
-                // .extern directive requires an explicit object size
+				// .extern directive requires an explicit object size
   NULL,         // "comm" (communal variable)
   NULL,         // get_type_name
   NULL,         // "align" keyword
@@ -173,12 +166,9 @@ static asm_t *asms[] = { &stasm, &cosmic, NULL };
 
 //--------------------------------------------------------------------------
 ea_t memstart;
-//static char device[MAXSTR] = "";
-//static const char cfgname[] = "stm8.cfg";
-
-char device[MAXSTR] = "";
-static size_t numports;
-static ioport_t *ports = NULL;
+static netnode helper;
+qstring device;
+static ioports_t ports;
 
 #include <iocommon.cpp>
 
@@ -192,113 +182,170 @@ static ioport_t *ports = NULL;
 //----------------------------------------------------------------------
 const ioport_t *find_sym(ea_t address)
 {
-  const ioport_t *port = find_ioport(ports, numports, address);
-  return port;
+	const ioport_t *port = find_ioport(ports, address);
+	return port;
 }
 
 //----------------------------------------------------------------------
 static void create_words(void)
 {
-  for ( size_t i=0; i < numports; i++ )
-  {
-    ea_t ea = ports[i].address;
-    if ( isTail(get_flags_novalue(ea)) )
-      do_unknown(ea, DOUNK_SIMPLE);
-    doWord(ea, 2);
-  }
+	for (size_t i = 0; i < ports.size(); i++)
+	{
+		ea_t ea = ports[i].address;
+		if (is_tail(get_flags(ea)))
+			del_items(ea, DELIT_SIMPLE);
+		create_word(ea, 2);
+	}
 }
 
 //--------------------------------------------------------------------------
-const char * idaapi set_idp_options(const char *keyword,int /*value_type*/,const void * /*value*/)
+const char * idaapi set_idp_options(const char *keyword, int /*value_type*/, const void * /*value*/)
 {
-  if ( keyword != NULL ) return IDPOPT_BADKEY;
-  char cfgfile[QMAXFILE];
-  get_cfg_filename(cfgfile, sizeof(cfgfile));
-  if ( choose_ioport_device(cfgfile, device, sizeof(device), NULL) )
-    set_device_name(device, IORESP_PORT|IORESP_INT);
-  return IDPOPT_OK;
+	if (keyword != NULL) return IDPOPT_BADKEY;
+	char cfgfile[QMAXFILE];
+	get_cfg_filename(cfgfile, sizeof(cfgfile));
+	if (choose_ioport_device(&device, cfgfile))
+		set_device_name(device.c_str(), IORESP_PORT | IORESP_INT);
+	return IDPOPT_OK;
 }
 
 //--------------------------------------------------------------------------
-netnode helper;
-
-static int idaapi notify(processor_t::idp_notify msgid, ...)
+static ssize_t idaapi notify(void *, int msgid, va_list va)
 {
-  int retcode = 1;
-  va_list va;
-  va_start(va, msgid);
+	int retcode = 1;
 
-// A well behaving processor module should call invoke_callbacks()
-// in his notify() function. If this function returns 0, then
-// the processor module should process the notification itself
-// Otherwise the code should be returned to the caller:
+	switch (msgid)
+	{
+	case processor_t::ev_init:
+		helper.create("$ stm8");
+		inf.set_be(true);
+		break;
 
-  int code = invoke_callbacks(HT_IDP, msgid, va);
-  if ( code ) return code;
+	case processor_t::ev_term:
+		ports.clear();
+		break;
 
-  switch ( msgid )
-  {
-    case processor_t::init:
-      helper.create("$ st8");
-      inf.mf = 1;
-    default:
-      break;
-
-    case processor_t::newfile:  // new file loaded
-      {
-        char cfgfile[QMAXFILE];
-        get_cfg_filename(cfgfile, sizeof(cfgfile));
-        if ( choose_ioport_device(cfgfile, device, sizeof(device), NULL) )
-          set_device_name(device, IORESP_ALL);
-        create_words();
-      }
-      break;
-
-    case processor_t::oldfile:  // old file loaded
-      {
-        char buf[MAXSTR];
-        if ( helper.supval(-1, buf, sizeof(buf)) > 0 )
-          set_device_name(buf, IORESP_NONE);
-      }
-      break;
-
-    case processor_t::is_jump_func:
-      {
-        const func_t *pfn = va_arg(va, const func_t *);
-        ea_t *jump_target = va_arg(va, ea_t *);
-        return is_jump_func(pfn, jump_target);
-      }
-
-    case processor_t::is_sane_insn:
-      return is_sane_insn(va_arg(va, int));
-
-    case processor_t::may_be_func:
-                                // can a function start here?
-                                // arg: none, the instruction is in 'cmd'
-                                // returns: probability 0..100
-                                // 'cmd' structure is filled upon the entrace
-                                // the idp module is allowed to modify 'cmd'
-      return may_be_func();
-      
-  	case processor_t::get_autocmt:
+	case processor_t::ev_newfile:  // new file loaded
 		{
-			char *buf = va_arg(va, char *);
-			size_t bufsize = va_arg(va, size_t);
-			if ( qsnprintf(buf, bufsize, "%s", insn_auto_cmts[cmd.itype]) )
-				retcode = 2;
+			char cfgfile[QMAXFILE];
+			get_cfg_filename(cfgfile, sizeof(cfgfile));
+			qstring qcfgfile = cfgfile;
+			if (choose_ioport_device(&device, cfgfile))
+				set_device_name(device.c_str(), IORESP_ALL);
+			create_words();
 		}
 		break;
 
-  }
-  va_end(va);
-  return retcode;
+	case processor_t::ev_oldfile:  // old file loaded
+		{
+			char buf[MAXSTR];
+			if (helper.supval(-1, buf, sizeof(buf)) > 0)
+				set_device_name(buf, IORESP_NONE);
+		}
+		break;
+
+	case processor_t::ev_is_jump_func:
+		{
+			const func_t *pfn = va_arg(va, const func_t *);
+			ea_t *jump_target = va_arg(va, ea_t *);
+			return is_jump_func(pfn, jump_target);
+		}
+
+	case processor_t::ev_is_ret_insn:
+		{
+			const insn_t *insn = va_arg(va, insn_t *);
+			const struct opcode_t &opinfo = get_opcode_info(get_byte(insn->ea));
+			if (opinfo.itype == ST8_ret
+				|| opinfo.itype == ST8_retf)
+				retcode = 1;
+			else
+				retcode = -1;
+		}
+		break;
+
+	case processor_t::ev_is_sane_insn:
+		{
+			insn_t *insn = va_arg(va, insn_t*);
+			int no_crefs = va_arg(va, int);
+			return is_sane_insn(insn, no_crefs);
+		}
+
+	case processor_t::ev_may_be_func:
+		// can a function start here?
+		// arg: none, the instruction is in 'cmd'
+		// returns: probability 0..100
+		// 'cmd' structure is filled upon the entrace
+		// the idp module is allowed to modify 'cmd'
+		return may_be_func();
+
+	case processor_t::ev_get_autocmt:
+		{
+			qstring *buf = va_arg(va, qstring *);
+			insn_t *insn = va_arg(va, insn_t*);
+			*buf = insn_auto_cmts[insn->itype];
+		}
+		break;
+	case processor_t::ev_out_header:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			stm8_header(*ctx);
+			return 1;
+		}
+
+	case processor_t::ev_out_footer:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			stm8_footer(*ctx);
+			return 1;
+		}
+
+	case processor_t::ev_out_segstart:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			segment_t *seg = va_arg(va, segment_t *);
+			stm8_segstart(*ctx, seg);
+			return 1;
+		}
+
+	case processor_t::ev_ana_insn:
+		{
+			insn_t *out = va_arg(va, insn_t *);
+			return ana(out);
+		}
+
+	case processor_t::ev_emu_insn:
+		{
+			const insn_t *insn = va_arg(va, const insn_t *);
+			return emu(*insn) ? 1 : -1;
+		}
+
+	case processor_t::ev_out_insn:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			out_insn(*ctx);
+			return 1;
+		}
+
+	case processor_t::ev_out_operand:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			const op_t *op = va_arg(va, const op_t *);
+			return out_opnd(*ctx, *op) ? 1 : -1;
+		}
+
+	default:
+		retcode = 0;
+		break;
+	}
+
+	return retcode;
 }
 
 //-----------------------------------------------------------------------
-#define FAMILY "SGS-Thomson ST8:"
-static const char *const shnames[] = { "st8", NULL };
+#define FAMILY "SGS-Thomson STM8:"
+static const char *const shnames[] = { "stm8", NULL };
 static const char *const lnames[] = {
-  FAMILY"SGS-Thomson ST8",
+  FAMILY"SGS-Thomson STM8",
   NULL
 };
 
@@ -307,77 +354,44 @@ static const char *const lnames[] = {
 //-----------------------------------------------------------------------
 processor_t LPH =
 {
-  IDP_INTERFACE_VERSION,        // version
-  0x8000,                     // id
-  PRN_HEX|PR_RNAMESOK,
-  8,                            // 8 bits in a byte for code segments
-  8,                            // 8 bits in a byte for other segments
+	IDP_INTERFACE_VERSION,        // version
+	0x8000,                       // id
+	PRN_HEX | PR_RNAMESOK,		  // flag
+	0,							  // flag2
+	8,                            // 8 bits in a byte for code segments
+	8,                            // 8 bits in a byte for other segments
 
-  shnames,
-  lnames,
+	shnames,
+	lnames,
 
-  asms,
+	asms,
 
-  notify,
+	notify,						//Event notification handler
 
-  header,
-  footer,
+	register_names,				// Register names  
+	qnumber(register_names),	// Number of registers
 
-  segstart,
-  segend,
+	ds,							// first segreg
+	cs,							// last  segreg
+	2,							// size of a segment register
+	cs, 						// number of CS register
+	ds,							// number of DS register
 
-  NULL,                 // generate "assume" directives
+	NULL,						// codestart 当一个新文件加载时, 用来识别代码开始位置的序列
+	retcodes,
 
-  ana,                  // analyze instruction
-  emu,                  // emulate instruction
+	ST8_null,					// < icode of the first instruction
+	ST8_last,					// < icode of the last instruction + 1
+	Instructions,
 
-  out,                  // generate text representation of instruction
-  outop,                // generate ...                    operand
-  intel_data,           // generate ...                    data directive
-  NULL,                 // compare operands
-  NULL,                 // can have type
+	0,                   // int tbyte_size;  -- doesn't exist
 
-  qnumber(register_names), // Number of registers
-  register_names,       // Register names
-  NULL,                 // get abstract register
+	{ 0, 7, 15, 0 },     // char real_width[4];
+						 // number of symbols after decimal point
+						 // 2byte float (0-does not exist)
+						 // normal float
+						 // normal double
+						 // long double
+	ST8_ret,             // Icode of return instruction. It is ok to give any of possible return instructions
 
-  0,                    // Number of register files
-  NULL,                 // Register file names
-  NULL,                 // Register descriptions
-  NULL,                 // Pointer to CPU registers
-
-  ds,                   // first
-  cs,                   // last
-  2,                    // size of a segment register
-  cs, ds,
-
-  NULL,                 // No known code start sequences
-  retcodes,
-
-  ST8_null,
-  ST8_last,
-  Instructions,
-
-  NULL,                 // int  (*is_far_jump)(int icode);
-  NULL,                 // Translation function for offsets
-  0,                    // int tbyte_size;  -- doesn't exist
-  ieee_realcvt,         // int (*realcvt)(void *m, ushort *e, ushort swt);
-  { 0, 7, 15, 0 },      // char real_width[4];
-                        // number of symbols after decimal point
-                        // 2byte float (0-does not exist)
-                        // normal float
-                        // normal double
-                        // long double
-  NULL,                 // int (*is_switch)(switch_info_t *si);
-  NULL,                 // int32 (*gen_map_file)(FILE *fp);
-  NULL,                 // ea_t (*extract_address)(ea_t ea,const char *string,int x);
-  NULL,                 // int (*is_sp_based)(op_t &x);
-  NULL,                 // int (*create_func_frame)(func_t *pfn);
-  NULL,                 // int (*get_frame_retsize(func_t *pfn)
-  gen_stkvar_def,                 // void (*gen_stkvar_def)(char *buf,const member_t *mptr,int32 v);
-  gen_spcdef,           // Generate text representation of an item in a special segment
-  ST8_ret,              // Icode of return instruction. It is ok to give any of possible return instructions
-  set_idp_options,      // const char *(*set_idp_options)(const char *keyword,int value_type,const void *value);
-  is_align_insn,        // int (*is_align_insn)(ea_t ea);
-  NULL,                 // mvm_t *mvm;
 };

@@ -3,131 +3,140 @@
 
 static int flow;
 //------------------------------------------------------------------------
-static void process_immediate_number(int n)
+static void process_immediate_number(const insn_t &insn, int n)
 {
-  doImmd(cmd.ea);
-  if ( isDefArg(uFlag,n) ) return;
-  switch ( cmd.itype )
-  {
-    case ST8_bres:
-    case ST8_bset:
-    case ST8_btjf:
-    case ST8_btjt:
-      op_dec(cmd.ea, n);
-      break;
-  }
+	set_immd(insn.ea);
+	if (is_defarg(insn.flags, n)) return;
+	switch (insn.itype)
+	{
+	case ST8_bres:
+	case ST8_bset:
+	case ST8_btjf:
+	case ST8_btjt:
+		op_dec(insn.ea, n);
+		break;
+	}
 }
 
 //----------------------------------------------------------------------
-ea_t calc_mem(ea_t ea)
+ea_t calc_mem(const insn_t &insn, ea_t ea)
 {
-  return toEA(cmd.cs, ea);
+	return to_ea(insn.cs, ea);
 }
 
 //----------------------------------------------------------------------
-static void process_operand(op_t &x, bool isload)
+static void process_operand(const insn_t &insn, int opidx, bool isload)
 {
-  ea_t ea;
-  switch ( x.type )
-  {
-    case o_reg:
-    case o_phrase:
-      break;
+	const op_t& x = insn.ops[opidx];
+	ea_t ea;
+	switch (x.type)
+	{
+	case o_reg:
+	case o_phrase:
+		break;
 
-    case o_imm:
-      if ( !isload ) interr("emu");
-      process_immediate_number(x.n);
-      if ( isOff(uFlag, x.n) )
-        ua_add_off_drefs2(x, dr_O, 0);
-      break;
+	case o_imm:
+		if (!isload) interr(insn, "emu");
+		process_immediate_number(insn, x.n);
+		if (is_off(insn.flags, x.n))
+			insn.add_off_drefs(x, dr_O, 0);
+		break;
 
-    case o_mem:
-      if ( !is_forced_operand(cmd.ea, x.n) )
-      {
-        ea = calc_mem(x.addr);
-        ua_dodata2(x.offb, ea, x.dtyp);
-        dref_t dref = isload || (cmd.auxpref & aux_indir) ? dr_R : dr_W;
-        ua_add_dref(x.offb, ea, dref);
-      }
-      break;
+	case o_mem:
+		if (!is_forced_operand(insn.ea, x.n))
+		{
+			ea = calc_mem(insn, x.addr);
+			insn.create_op_data(x.offb, ea, x.dtype);
+			dref_t dref = isload || (insn.auxpref & aux_indir) ? dr_R : dr_W;
+			insn.add_dref(x.offb, ea, dref);
+		}
+		break;
 
-    case o_near:
-      {
-        cref_t ftype = fl_JN;
-        ea = calc_mem(x.addr);
-        if ( InstrIsSet(cmd.itype, CF_CALL) )
-        {
-          if ( !func_does_return(ea) )
-            flow = false;
-          ftype = fl_CN;
-        }
-        ua_add_cref(x.offb, ea, ftype);
-      }
-      break;
+	case o_near:
+		{
+			cref_t ftype = fl_JN;
+			ea = calc_mem(insn, x.addr);
+			if (has_insn_feature(insn.itype, CF_CALL))
+			{
+				if (!func_does_return(ea))
+					flow = false;
+				ftype = fl_CN;
+			}
+			insn.add_cref(x.offb, ea, ftype);
+		}
+		break;
 
-    case o_displ:
-      process_immediate_number(x.n);
-      if ( isOff(uFlag, x.n) && !is_forced_operand(cmd.ea, x.n) )
-        ua_add_off_drefs2(x, isload ? dr_R : dr_W, OOF_ADDR);
-      break;
+	case o_displ:
+		process_immediate_number(insn, x.n);
+		if (is_off(insn.flags, x.n) && !is_forced_operand(insn.ea, x.n))
+			insn.add_off_drefs(x, isload ? dr_R : dr_W, OOF_ADDR);
+		break;
 
-    default:
-      interr("emu");
-  }
+	default:
+		interr(insn, "emu");
+	}
 }
 
 
 //----------------------------------------------------------------------
-int idaapi emu(void)
+int idaapi emu(const insn_t &insn)
 {
-  uint32 Feature = cmd.get_canon_feature();
+	uint32 Feature = insn.get_canon_feature();
 
-  flow = ((Feature & CF_STOP) == 0);
+	flow = ((Feature & CF_STOP) == 0);
 
-  if ( Feature & CF_USE1 ) process_operand(cmd.Op1, true);
-  if ( Feature & CF_USE2 ) process_operand(cmd.Op2, true);
-  if ( Feature & CF_USE3 ) process_operand(cmd.Op3, true);
-  if ( Feature & CF_CHG1 ) process_operand(cmd.Op1, false);
-  if ( Feature & CF_CHG2 ) process_operand(cmd.Op2, false);
-  if ( Feature & CF_CHG3 ) process_operand(cmd.Op3, false);
+	if (Feature & CF_USE1) 
+		process_operand(insn, 0, true);
+	if (Feature & CF_USE2) 
+		process_operand(insn, 1, true);
+	if (Feature & CF_USE3) 
+		process_operand(insn, 2, true);
+	if (Feature & CF_CHG1) 
+		process_operand(insn, 0, false);
+	if (Feature & CF_CHG2) 
+		process_operand(insn, 1, false);
+	if (Feature & CF_CHG3) 
+		process_operand(insn, 2, false);
 
-//
-//      Determine if the next instruction should be executed
-//
-  if ( segtype(cmd.ea) == SEG_XTRN ) flow = 0;
-  if ( flow ) ua_add_cref(0,cmd.ea+cmd.size,fl_F);
+	//
+	//      Determine if the next instruction should be executed
+	//
+	if (segtype(insn.ea) == SEG_XTRN) 
+		flow = 0;
+	if (flow) 
+		insn.add_cref(0, insn.ea + insn.size, fl_F);
 
-  return 1;
+	return 1;
 }
 
 //----------------------------------------------------------------------
 int is_jump_func(const func_t * /*pfn*/, ea_t *jump_target)
 {
-  *jump_target = BADADDR;
-  return 1; // means "no"
+	*jump_target = BADADDR;
+	return 1; // means "no"
 }
 
 //----------------------------------------------------------------------
 int may_be_func(void)           // can a function start here?
-                                // arg: none, the instruction is in 'cmd'
-                                // returns: probability 0..100
-                                // 'cmd' structure is filled upon the entrace
-                                // the idp module is allowed to modify 'cmd'
+								// arg: none, the instruction is in 'cmd'
+								// returns: probability 0..100
+								// 'cmd' structure is filled upon the entrace
+								// the idp module is allowed to modify 'cmd'
 {
-//  if ( cmd.itype == H8_push && isbp(cmd.Op1.reg) ) return 100;  // push.l er6
-  return 0;
+	//  if ( insn.itype == H8_push && isbp(insn.Op1.reg) ) return 100;  // push.l er6
+	return 0;
 }
 
 //----------------------------------------------------------------------
-int is_sane_insn(int /*nocrefs*/)
+int is_sane_insn(insn_t *insn, int /*nocrefs*/)
 {
-  if ( cmd.itype == ST8_nop )
-  {
-    for ( int i=0; i < 8; i++ )
-      if ( get_word(cmd.ea-i*2) != 0 ) return 1;
-    return 0; // too many nops in a row
-  }
-  return 1;
+	if (insn->itype == ST8_nop)
+	{
+		for (int i = 0; i < 8; i++)
+			if (get_word(insn->ea - i * 2) != 0) return 1;
+		return 0; // too many nops in a row
+	}
+	return 1;
 }
 
 //----------------------------------------------------------------------
@@ -156,8 +165,8 @@ int is_sane_insn(int /*nocrefs*/)
 class stm8_jump_pattern_t : public jump_pattern_t
 {
 public:
-	stm8_jump_pattern_t(switch_info_ex_t &si)
-		: jump_pattern_t(roots, depends, si)
+	stm8_jump_pattern_t(switch_info_t *si)
+		: jump_pattern_t(si, roots, depends)
 		, indirect_register(-1)
 		, index_register(-1)
 	{
@@ -171,43 +180,43 @@ public:
 
 	bool jpi0()
 	{
-		bool valid = cmd.itype == ST8_jp;
+		bool valid = insn.itype == ST8_jp;
 		if (valid)
-			indirect_register = cmd.Op1.reg;
+			indirect_register = insn.Op1.reg;
 		return valid;
 	}
 	bool jpi1()
 	{
-		bool valid = cmd.itype == ST8_ldw && cmd.Op1.reg == indirect_register;
+		bool valid = insn.itype == ST8_ldw && insn.Op1.reg == indirect_register;
 		if (valid)
-			si.jumps = cmd.Op2.addr;
+			si->jumps = insn.Op2.addr;
 		return valid;
 	}
 	bool jpi2()
 	{
-		return cmd.itype == ST8_sllw && cmd.Op1.reg == indirect_register;
+		return insn.itype == ST8_sllw && insn.Op1.reg == indirect_register;
 	}
 	bool jpi3()
 	{
-		uint16 dst_reg = cmd.Op1.reg;
+		uint16 dst_reg = insn.Op1.reg;
 		if ((indirect_register == regnum_t::X) && (dst_reg != regnum_t::XL))
 			return false;
 		else if ((indirect_register == regnum_t::Y) && (dst_reg != regnum_t::YL))
 			return false;
 
-		index_register = cmd.Op2.reg;
+		index_register = insn.Op2.reg;
 
-		return cmd.itype == ST8_ld;
+		return insn.itype == ST8_ld;
 	}
 	bool jpi4()
 	{
-		return cmd.itype == ST8_clrw && cmd.Op1.reg == indirect_register;
+		return insn.itype == ST8_clrw && insn.Op1.reg == indirect_register;
 	}
 	bool jpi6()
 	{
-		bool valid = cmd.itype == ST8_cp && cmd.Op1.reg == index_register;
+		bool valid = insn.itype == ST8_cp && insn.Op1.reg == index_register;
 		if (valid)
-			si.ncases = cmd.Op2.value;
+			si->ncases = insn.Op2.value;
 		return valid;
 	}
 };
@@ -224,22 +233,23 @@ char const stm8_jump_pattern_t::depends[][2] =
 	{ 0 }     // cp      a, #$E
 };
 
-bool idaapi is_switch(switch_info_ex_t *si)
+bool idaapi is_switch(const insn_t &insn, switch_info_t *si)
 {
-	return stm8_jump_pattern_t(*si).match(cmd.ea);
+	return stm8_jump_pattern_t(si).match(insn);
 }
 
 //----------------------------------------------------------------------
-int idaapi is_align_insn(ea_t ea)
+int idaapi is_align_insn(const insn_t &insn, ea_t ea)
 {
-  if ( !decode_insn(ea) ) return 0;
-  switch ( cmd.itype )
-  {
-    case ST8_nop:
-      break;
-    default:
-      return 0;
-  }
-  return cmd.size;
+	insn_t tins;
+	if (!decode_insn(&tins, ea)) return 0;
+	switch (tins.itype)
+	{
+	case ST8_nop:
+		break;
+	default:
+		return 0;
+	}
+	return tins.size;
 }
 

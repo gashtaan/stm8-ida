@@ -3,6 +3,8 @@
 
 #define NO_OBSOLETE_FUNCS
 
+#pragma warning(disable:4005 4312 4244 4520 4018 4267 4800 4996 4482 4101 4002 4102 4101) 
+
 #include <idaidp.hpp>
 #include <diskio.hpp>
 #include "ins.hpp"
@@ -63,41 +65,38 @@ enum
 	ASM_COSMIC
 };
 
+
+struct opcode_t
+{
+	uchar itype;
+	uchar opcode;
+	ushort dst;
+	ushort src;
+	uchar len;
+	bool extended;
+	uchar iform;
+};
+
 //------------------------------------------------------------------
 extern netnode helper;
 
-ea_t calc_mem(ea_t ea);         // map virtual to physical ea
+ea_t calc_mem(const insn_t &insn, ea_t ea);         // map virtual to physical ea
 const ioport_t *find_sym(ea_t address);
+const struct opcode_t &get_opcode_info(uint8 opcode);
 //------------------------------------------------------------------
-void interr(const char *module);
+void interr(const insn_t &insn, const char *module);
+void idaapi stm8_header(outctx_t &ctx);
+void idaapi stm8_footer(outctx_t &ctx);
+void idaapi stm8_segstart(outctx_t &ctx, segment_t *Sarea);
 
-void idaapi header(void);
-void idaapi footer(void);
-
-void idaapi segstart(ea_t ea);
-void idaapi segend(ea_t ea);
-void idaapi assumes(ea_t ea);         // function to produce assume directives
 void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval_t v);
+int  idaapi ana(insn_t *_insn);
+int  idaapi emu(const insn_t &insn);
+bool idaapi is_switch(const insn_t &insn, switch_info_t *si);
 
-void idaapi out(void);
-int  idaapi outspec(ea_t ea,uchar segtype);
-
-int  idaapi ana(void);
-int  idaapi emu(void);
-bool idaapi outop(op_t &op);
-void idaapi data(ea_t ea);
-
-bool idaapi is_switch(switch_info_ex_t *si);
-int  idaapi is_align_insn(ea_t ea);
-bool create_func_frame(func_t *pfn);
-void out_rename(ea_t ea,int storage);
-int  out_storage_class(ea_t ea);
-void gen_stkvar_def(char *buf,const member_t *mptr,long v);
-bool is_sp_based(op_t &x);
-
+int is_sane_insn(insn_t *insn, int nocrefs);
 int get_frame_retsize(func_t *);
 int is_jump_func(const func_t *pfn, ea_t *jump_target);
-int is_sane_insn(int nocrefs);
 int may_be_func(void);           // can a function start here?
 
 #endif // _ST8_HPP
