@@ -111,7 +111,7 @@ instruc_t Instructions[] = {
 	{ "unknown",    0                               },        // UNKNOWN 0x71 instruction
 };
 
-char const *insn_auto_cmts[] = {
+const char *insn_auto_cmts[] = {
 	"Unknown Operation",
 	"Add with Carry",
 	"Addition",

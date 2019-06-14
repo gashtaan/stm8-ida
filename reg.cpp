@@ -338,8 +338,9 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 	case processor_t::ev_get_autocmt:
 		{
 			qstring *buf = va_arg(va, qstring *);
-			insn_t *insn = va_arg(va, insn_t*);
+			const insn_t *insn = va_arg(va, const insn_t*);
 			*buf = insn_auto_cmts[insn->itype];
+			return 1;
 		}
 		break;
 

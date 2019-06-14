@@ -2,7 +2,7 @@
 #define __INSTRS_HPP
 
 extern instruc_t Instructions[];
-extern char const *insn_auto_cmts[];
+extern const char *insn_auto_cmts[];
 
 enum nameNum
 {

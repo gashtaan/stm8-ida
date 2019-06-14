@@ -1,5 +1,5 @@
 #include "st8.hpp"
-//#include <frame.hpp>
+#include <frame.hpp>
 
 static int flow;
 //------------------------------------------------------------------------
@@ -14,6 +14,130 @@ static void process_immediate_number(const insn_t &insn, int n)
 	case ST8_btjf:
 	case ST8_btjt:
 		op_dec(insn.ea, n);
+		break;
+	}
+}
+
+//----------------------------------------------------------------------
+inline bool issp(int x)
+{
+	return x == SP;
+}
+//----------------------------------------------------------------------
+int idaapi is_sp_based(const insn_t &, const op_t &x)
+{
+	return OP_SP_ADD
+		| ((x.type == o_displ || x.type == o_phrase) && issp(x.phrase)
+			? OP_SP_BASED
+			: OP_FP_BASED);
+}
+//----------------------------------------------------------------------
+static void add_stkpnt(const insn_t &insn, sval_t value)
+{
+	func_t *pfn = get_func(insn.ea);
+	if (pfn == NULL)
+		return;
+
+	add_auto_stkpnt(pfn, insn.ea + insn.size, value);
+}
+
+//----------------------------------------------------------------------
+static bool get_op_value(
+	const insn_t &_insn,
+	const op_t &x,
+	uval_t *value,
+	ea_t *base_addr = NULL)
+{
+	if (base_addr != NULL)
+		*base_addr = 0;
+
+	if (x.type == o_imm)
+	{
+		*value = x.value;
+		return true;
+	}
+
+	uint16 reg = x.reg;
+
+	bool ok = false;
+	insn_t insn;
+	ea_t next_ea = _insn.ea;
+	while ((!has_xref(get_flags(next_ea)) || get_first_cref_to(next_ea) == BADADDR)
+		&& decode_prev_insn(&insn, next_ea) != BADADDR)
+	{
+		if ((insn.itype == ST8_ld || insn.itype == ST8_ldw)
+			&& insn.Op2.type == o_imm
+			&& insn.Op1.type == o_reg
+			&& insn.Op1.reg == reg)
+		{
+			*value = insn.Op2.value;
+			ok = true;
+			break;
+		}
+
+		next_ea = insn.ea;
+	}
+
+	return ok;
+}
+//----------------------------------------------------------------------
+static void trace_sp(const insn_t &insn)
+{
+/*
+	// @sp++
+	if (insn.Op1.type == o_phrase
+		&& issp(insn.Op1.reg)
+		&& insn.Op1.phtype == ph_post_inc)
+	{
+		ssize_t size = get_dtype_size(insn.Op2.dtype);
+		if (insn.Op2.type == o_reglist)
+			size *= insn.Op2.nregs;
+		add_stkpnt(insn, size);
+		return;
+	}
+
+	// @--sp
+	if (insn.Op2.type == o_phrase
+		&& issp(insn.Op2.reg)
+		&& insn.Op2.phtype == ph_pre_dec)
+	{
+		ssize_t size = get_dtype_size(insn.Op1.dtype);
+		if (insn.Op1.type == o_reglist)
+			size *= insn.Op1.nregs;
+		add_stkpnt(insn, -size);
+		return;
+	}
+*/
+
+	uval_t v;
+	switch (insn.itype)
+	{
+
+	case ST8_add:
+	case ST8_addw:
+		if (!issp(insn.Op1.reg))
+			break;
+		if (get_op_value(insn, insn.Op2, &v))
+			add_stkpnt(insn, v);
+		break;
+	case ST8_sub:
+	case ST8_subw:
+		if (!issp(insn.Op1.reg))
+			break;
+		if (get_op_value(insn, insn.Op2, &v))
+			add_stkpnt(insn, 0 - v);
+		break;
+	case ST8_push:
+		add_stkpnt(insn, 0 - get_dtype_size(insn.Op1.dtype));
+		break;
+	case ST8_pushw:
+		add_stkpnt(insn, 0 - get_dtype_size(insn.Op1.dtype));
+		break;
+	case ST8_pop:
+		add_stkpnt(insn, get_dtype_size(insn.Op1.dtype));
+		break;
+	case ST8_popw:
+		add_stkpnt(insn, get_dtype_size(insn.Op1.dtype));
 		break;
 	}
 }
@@ -104,6 +228,16 @@ int idaapi emu(const insn_t &insn)
 		flow = 0;
 	if (flow) 
 		insn.add_cref(insn.ea + insn.size, 0, fl_F);
+
+	//
+	// Handle SP modifications
+// 	if (may_trace_sp())
+// 	{
+// 		if (!flow)
+// 			recalc_spd(insn.ea);     // recalculate SP register for the next insn
+// 		else
+// 			trace_sp(insn);
+// 	}
 
 	return 1;
 }
