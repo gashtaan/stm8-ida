@@ -25,9 +25,8 @@ ea_t calc_mem(const insn_t &insn, ea_t ea)
 }
 
 //----------------------------------------------------------------------
-static void process_operand(const insn_t &insn, int opidx, bool isload)
+static void process_operand(const insn_t &insn, const op_t &x, bool isload)
 {
-	const op_t& x = insn.ops[opidx];
 	ea_t ea;
 	switch (x.type)
 	{
@@ -46,9 +45,9 @@ static void process_operand(const insn_t &insn, int opidx, bool isload)
 		if (!is_forced_operand(insn.ea, x.n))
 		{
 			ea = calc_mem(insn, x.addr);
-			insn.create_op_data(x.offb, ea, x.dtype);
+			insn.create_op_data(ea, x.offb, x.dtype);
 			dref_t dref = isload || (insn.auxpref & aux_indir) ? dr_R : dr_W;
-			insn.add_dref(x.offb, ea, dref);
+			insn.add_dref(ea, x.offb, dref);
 		}
 		break;
 
@@ -62,7 +61,7 @@ static void process_operand(const insn_t &insn, int opidx, bool isload)
 					flow = false;
 				ftype = fl_CN;
 			}
-			insn.add_cref(x.offb, ea, ftype);
+			insn.add_cref(ea, x.offb, ftype);
 		}
 		break;
 
@@ -86,25 +85,25 @@ int idaapi emu(const insn_t &insn)
 	flow = ((Feature & CF_STOP) == 0);
 
 	if (Feature & CF_USE1) 
-		process_operand(insn, 0, true);
+		process_operand(insn, insn.Op1, true);
 	if (Feature & CF_USE2) 
-		process_operand(insn, 1, true);
+		process_operand(insn, insn.Op2, true);
 	if (Feature & CF_USE3) 
-		process_operand(insn, 2, true);
+		process_operand(insn, insn.Op3, true);
 	if (Feature & CF_CHG1) 
-		process_operand(insn, 0, false);
-	if (Feature & CF_CHG2) 
-		process_operand(insn, 1, false);
-	if (Feature & CF_CHG3) 
-		process_operand(insn, 2, false);
+		process_operand(insn, insn.Op1, false);
+	if (Feature & CF_CHG2)
+		process_operand(insn, insn.Op2, false);
+	if (Feature & CF_CHG3)
+		process_operand(insn, insn.Op3, false);
 
 	//
-	//      Determine if the next instruction should be executed
+	// 确定是否应该执行下一条指令, 关键, 这里处理不对, 一次只会分析一条指令了
 	//
 	if (segtype(insn.ea) == SEG_XTRN) 
 		flow = 0;
 	if (flow) 
-		insn.add_cref(0, insn.ea + insn.size, fl_F);
+		insn.add_cref(insn.ea + insn.size, 0, fl_F);
 
 	return 1;
 }
@@ -128,12 +127,12 @@ int may_be_func(void)           // can a function start here?
 }
 
 //----------------------------------------------------------------------
-int is_sane_insn(insn_t *insn, int /*nocrefs*/)
+int is_sane_insn(const insn_t &insn, int /*nocrefs*/)
 {
-	if (insn->itype == ST8_nop)
+	if (insn.itype == ST8_nop)
 	{
 		for (int i = 0; i < 8; i++)
-			if (get_word(insn->ea - i * 2) != 0) return 1;
+			if (get_word(insn.ea - i * 2) != 0) return 1;
 		return 0; // too many nops in a row
 	}
 	return 1;
@@ -233,23 +232,24 @@ char const stm8_jump_pattern_t::depends[][2] =
 	{ 0 }     // cp      a, #$E
 };
 
-bool idaapi is_switch(const insn_t &insn, switch_info_t *si)
+bool idaapi stm8_is_switch(switch_info_t *si, const insn_t &insn)
 {
 	return stm8_jump_pattern_t(si).match(insn);
 }
 
 //----------------------------------------------------------------------
-int idaapi is_align_insn(const insn_t &insn, ea_t ea)
+int idaapi stm8_is_align_insn(ea_t ea)
 {
-	insn_t tins;
-	if (!decode_insn(&tins, ea)) return 0;
-	switch (tins.itype)
+	insn_t insn;
+	if (decode_insn(&insn, ea) < 1)
+		return 0;
+	switch (insn.itype)
 	{
 	case ST8_nop:
 		break;
 	default:
 		return 0;
 	}
-	return tins.size;
+	return insn.size;
 }
 

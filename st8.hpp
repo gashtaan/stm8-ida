@@ -88,13 +88,14 @@ void interr(const insn_t &insn, const char *module);
 void idaapi stm8_header(outctx_t &ctx);
 void idaapi stm8_footer(outctx_t &ctx);
 void idaapi stm8_segstart(outctx_t &ctx, segment_t *Sarea);
-
-void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval_t v);
+void idaapi stm8_segend(outctx_t &ctx, segment_t *seg);
+int idaapi stm8_is_align_insn(ea_t ea);
+void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v);
 int  idaapi ana(insn_t *_insn);
 int  idaapi emu(const insn_t &insn);
-bool idaapi is_switch(const insn_t &insn, switch_info_t *si);
+bool idaapi stm8_is_switch(switch_info_t *si, const insn_t &insn);
 
-int is_sane_insn(insn_t *insn, int nocrefs);
+int is_sane_insn(const insn_t &insn, int nocrefs);
 int get_frame_retsize(func_t *);
 int is_jump_func(const func_t *pfn, ea_t *jump_target);
 int may_be_func(void);           // can a function start here?

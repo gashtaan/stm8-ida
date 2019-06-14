@@ -123,8 +123,10 @@ bool out_stm8_t::out_operand(const op_t &x)
 void out_stm8_t::out_insn(void)
 {
 	out_mnemonic();
+	bool showOp1 = insn.Op1.shown();
+	if (showOp1)
+		out_one_operand(0);
 
-	out_one_operand(0);
 	if (insn.Op2.type != o_void)
 	{
 		out_symbol(',');
@@ -253,13 +255,13 @@ void idaapi stm8_segstart(outctx_t &ctx, segment_t *Sarea)
 }
 
 //--------------------------------------------------------------------------
-void idaapi segend(outctx_t &ctx, segment_t *seg)
+void idaapi stm8_segend(outctx_t &ctx, segment_t *seg)
 {
 }
 
 //--------------------------------------------------------------------------
 //  Generate stack variable definition line
-void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval_t v)
+void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v)
 {
 	char sign = ' ';
 	if (v < 0)
@@ -273,20 +275,19 @@ void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval
 	qstring name = get_member_name(mptr->id);
 	if (ash.uflag == ASM_COSMIC)
 	{
-		qsnprintf(buf, bufsize,
-			COLSTR("%s", SCOLOR_LOCNAME)
+		ctx.out_printf(COLSTR("%s", SCOLOR_LOCNAME)
 			COLSTR(": ", SCOLOR_SYMBOL)
-			COLSTR("set", SCOLOR_ASMDIR)
+			COLSTR(".assign", SCOLOR_ASMDIR)
 			COLSTR(" %c", SCOLOR_SYMBOL)
 			COLSTR("%s", SCOLOR_DNUM),
 			name.c_str(), sign, num);
 	}
 	else
 	{
-		qsnprintf(buf, bufsize,
-			COLSTR("%-*s", SCOLOR_LOCNAME)
+		ctx.out_printf(COLSTR("%-*s", SCOLOR_LOCNAME)
 			COLSTR("= %c", SCOLOR_SYMBOL)
-			COLSTR("%s", SCOLOR_DNUM), inf.indent, name.c_str(), sign, num);
+			COLSTR("%s", SCOLOR_DNUM),
+			inf.indent, name.c_str(), sign, num);
 	}
 }
 
@@ -294,8 +295,8 @@ void idaapi gen_stkvar_def(char *buf, size_t bufsize, const member_t *mptr, sval
 void idaapi stm8_header(outctx_t &ctx)
 {
 	//D  gen_cmt_line("Processor       : %-8.8s", inf.procName);
-	//  gen_cmt_line("Target assembler: %s", ash.name);
 	ctx.gen_header(GH_PRINT_PROC | GH_PRINT_HEADER);
+	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
 	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
 	ctx.gen_empty_line();
 }

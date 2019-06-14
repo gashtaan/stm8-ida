@@ -776,7 +776,7 @@ inline void opaddr(insn_t &insn, op_t &x, char dtyp)
   x.dtype = dtyp;
   x.addr = value;
 }
-inline void opimm(op_t &x, uint32 value, char dtyp)
+inline void opimm(insn_t &insn, op_t &x, uint32 value, char dtyp)
 {
   x.type = o_imm;
   x.dtype = dtyp;
@@ -792,7 +792,7 @@ inline void oprel(insn_t &insn, op_t &x)
   x.addr = insn.ip + insn.size + disp;
 }
 
-inline void opreg(op_t &x, int reg)
+inline void opreg(insn_t &insn, op_t &x, int reg)
 {
   x.type = o_reg;
   x.dtype = dt_byte;
@@ -915,17 +915,17 @@ void HandleOp(insn_t &insn, opcode_t* op, ushort format, uchar which_op)
 		case F_REGLY:
 		case F_REGCC:
 		{
-			opreg(insn.ops[which_op], format);
+			opreg(insn, insn.ops[which_op], format);
 		} break;
 		case F_BYTE:
 		{
 			off = ReadU8(insn);
-			opimm(insn.ops[which_op], off, dt_byte);
+			opimm(insn, insn.ops[which_op], off, dt_byte);
 		} break;
 		case F_WORD:
 		{
 			uimm = ReadU16(insn);
-			opimm(insn.ops[which_op], uimm, dt_word);
+			opimm(insn, insn.ops[which_op], uimm, dt_word);
 		} break;
 		case F_SHORTMEM:
 		{
@@ -1049,7 +1049,7 @@ void HandleOp(insn_t &insn, opcode_t* op, ushort format, uchar which_op)
 		case F_NPOS6:
 		case F_NPOS7:
 		{
-			opimm(insn.ops[which_op], format-F_NPOS0, dt_byte);
+			opimm(insn, insn.ops[which_op], format-F_NPOS0, dt_byte);
 		} break;
 		case F_NONE:
 		{
@@ -1084,12 +1084,13 @@ void Insn3(insn_t &insn, opcode_t* op)
 // 分析指令
 int idaapi ana(insn_t *_insn)
 {
+	opcode_t* op = nullptr;
 	insn_t &insn = *_insn;
-	opcode_t* op = NULL;
 	uchar code = insn.get_next_byte();
 
 	switch ( code )
 	{
+		// STM8的几个指令前缀
 		case 0x90:
 			code = insn.get_next_byte();
 			op = find_opcode(code,pre90, qnumber(pre90));
@@ -1117,12 +1118,13 @@ int idaapi ana(insn_t *_insn)
 				else insn.itype = ST8_null;
 			break;
 		default:
-			op = (opcode_t*)&primary[code];
+			op = (opcode_t*)&get_opcode_info(code);
 			if(op) insn.itype = op->itype;
 				else insn.itype = ST8_null;
 			break;
 	}
-	if ( insn.itype == ST8_null ) return 0;
+	if ( insn.itype == ST8_null ) 
+		return 0;
 
 	switch (op->iform)
 	{

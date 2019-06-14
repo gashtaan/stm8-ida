@@ -15,10 +15,12 @@ static const char *register_names[] =
 //--------------------------------------------------------------------------
 static uchar retcode0[] = { 0x80 }; // iret  80
 static uchar retcode1[] = { 0x81 }; // ret   81
+static uchar retcode2[] = { 0x87 }; // retf  87
 static bytes_t retcodes[] =
 {
  { sizeof(retcode0), retcode0 },
  { sizeof(retcode1), retcode1 },
+ { sizeof(retcode2), retcode2 },
  { 0, NULL }
 };
 
@@ -169,15 +171,16 @@ ea_t memstart;
 static netnode helper;
 qstring device;
 static ioports_t ports;
+static const char cfgname[] = "stm8.cfg";
 
 #include <iocommon.cpp>
 
 //
-//static void load_symbols(void)
-//{
-//  free_ioports(ports, numports);
-//  ports = read_ioports(&numports, cfgname, device, NULL);
-//}
+static void load_symbols(void)
+{
+	ports.clear();
+	read_ioports(&ports, &device, cfgname);
+ }
 //
 //----------------------------------------------------------------------
 const ioport_t *find_sym(ea_t address)
@@ -201,36 +204,51 @@ static void create_words(void)
 //--------------------------------------------------------------------------
 const char * idaapi set_idp_options(const char *keyword, int /*value_type*/, const void * /*value*/)
 {
-	if (keyword != NULL) return IDPOPT_BADKEY;
-	char cfgfile[QMAXFILE];
-	get_cfg_filename(cfgfile, sizeof(cfgfile));
-	if (choose_ioport_device(&device, cfgfile))
-		set_device_name(device.c_str(), IORESP_PORT | IORESP_INT);
+	if (keyword != NULL) 
+		return IDPOPT_BADKEY;
+// 	char cfgfile[QMAXFILE];
+// 	get_cfg_filename(cfgfile, sizeof(cfgfile));
+	if (choose_ioport_device(&device, cfgname))
+		load_symbols();// set_device_name(device.c_str(), IORESP_PORT | IORESP_INT);
 	return IDPOPT_OK;
 }
 
+static ssize_t idaapi idb_callback(void *, int code, va_list /*va*/)
+{
+	switch (code)
+	{
+	case idb_event::closebase:
+	case idb_event::savebase:
+		helper.supset(0, device.c_str());
+		break;
+	}
+	return 0;
+}
 //--------------------------------------------------------------------------
 static ssize_t idaapi notify(void *, int msgid, va_list va)
 {
-	int retcode = 1;
+	int retcode = 0;
 
 	switch (msgid)
 	{
 	case processor_t::ev_init:
+		hook_to_notification_point(HT_IDB, idb_callback);
 		helper.create("$ stm8");
+		helper.supstr(&device, 0);
 		inf.set_be(true);
 		break;
 
 	case processor_t::ev_term:
 		ports.clear();
+		unhook_from_notification_point(HT_IDB, idb_callback);
 		break;
 
 	case processor_t::ev_newfile:  // new file loaded
 		{
-			char cfgfile[QMAXFILE];
-			get_cfg_filename(cfgfile, sizeof(cfgfile));
-			qstring qcfgfile = cfgfile;
-			if (choose_ioport_device(&device, cfgfile))
+// 			char cfgfile[QMAXFILE];
+// 			get_cfg_filename(cfgfile, sizeof(cfgfile));
+
+			if (choose_ioport_device(&device, cfgname))
 				set_device_name(device.c_str(), IORESP_ALL);
 			create_words();
 		}
@@ -255,7 +273,8 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 		{
 			const insn_t *insn = va_arg(va, insn_t *);
 			const struct opcode_t &opinfo = get_opcode_info(get_byte(insn->ea));
-			if (opinfo.itype == ST8_ret
+			if (opinfo.itype == ST8_iret
+				|| opinfo.itype == ST8_ret
 				|| opinfo.itype == ST8_retf)
 				retcode = 1;
 			else
@@ -265,9 +284,47 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 
 	case processor_t::ev_is_sane_insn:
 		{
-			insn_t *insn = va_arg(va, insn_t*);
+			const insn_t &insn = *va_arg(va, insn_t *);
 			int no_crefs = va_arg(va, int);
-			return is_sane_insn(insn, no_crefs);
+			retcode = is_sane_insn(insn, no_crefs) == 1 ? 1 : -1;
+		}
+		break;
+
+	case processor_t::ev_is_switch:
+		{
+			switch_info_t *si = va_arg(va, switch_info_t *);
+			const insn_t *insn = va_arg(va, const insn_t *);
+			return stm8_is_switch(si, *insn) ? 1 : 0;
+		}
+
+	case processor_t::ev_gen_stkvar_def:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			const ::member_t * memt = va_arg(va, const ::member_t *);
+			sval_t v = va_arg(va, sval_t);
+
+			stm8_gen_stkvar_def(*ctx, memt, v);
+			return 1;
+		}
+
+	case processor_t::ev_set_idp_options:
+		{
+			const char *keyword = va_arg(va, const char *);
+			int value_type = va_arg(va, int);
+			const char *value = va_arg(va, const char *);
+			const char *retstr = set_idp_options(keyword, value_type, value);
+			if (retstr == IDPOPT_OK)
+				return 1;
+			const char **errmsg = va_arg(va, const char **);
+			if (errmsg != NULL)
+				*errmsg = retstr;
+			return -1;
+		}
+
+	case processor_t::ev_is_align_insn:
+		{
+			ea_t ea = va_arg(va, ea_t);
+			return stm8_is_align_insn(ea);
 		}
 
 	case processor_t::ev_may_be_func:
@@ -285,6 +342,7 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 			*buf = insn_auto_cmts[insn->itype];
 		}
 		break;
+
 	case processor_t::ev_out_header:
 		{
 			outctx_t *ctx = va_arg(va, outctx_t *);
@@ -304,6 +362,14 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 			outctx_t *ctx = va_arg(va, outctx_t *);
 			segment_t *seg = va_arg(va, segment_t *);
 			stm8_segstart(*ctx, seg);
+			return 1;
+		}
+
+	case processor_t::ev_out_segend:
+		{
+			outctx_t *ctx = va_arg(va, outctx_t *);
+			segment_t *seg = va_arg(va, segment_t *);
+			stm8_segend(*ctx, seg);
 			return 1;
 		}
 
@@ -334,7 +400,6 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 		}
 
 	default:
-		retcode = 0;
 		break;
 	}
 
@@ -343,7 +408,7 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 
 //-----------------------------------------------------------------------
 #define FAMILY "SGS-Thomson STM8:"
-static const char *const shnames[] = { "stm8", NULL };
+static const char *const shnames[] = { "st8", NULL };
 static const char *const lnames[] = {
   FAMILY"SGS-Thomson STM8",
   NULL
@@ -354,12 +419,14 @@ static const char *const lnames[] = {
 //-----------------------------------------------------------------------
 processor_t LPH =
 {
-	IDP_INTERFACE_VERSION,        // version
-	0x8000,                       // id
-	PRN_HEX | PR_RNAMESOK,		  // flag
-	0,							  // flag2
-	8,                            // 8 bits in a byte for code segments
-	8,                            // 8 bits in a byte for other segments
+	IDP_INTERFACE_VERSION,      // version
+	0x8000,                     // id
+	PRN_HEX | PR_RNAMESOK,		// flag
+								// flag2
+	PR2_REALCVT					// the module has 'realcvt' event implementation
+  | PR2_IDP_OPTS,				// the module has processor-specific configuration options
+	8,                          // 8 bits in a byte for code segments
+	8,                          // 8 bits in a byte for other segments
 
 	shnames,
 	lnames,
