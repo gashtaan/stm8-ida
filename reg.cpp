@@ -235,7 +235,7 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 		hook_to_notification_point(HT_IDB, idb_callback);
 		helper.create("$ stm8");
 		helper.supstr(&device, 0);
-		inf.set_be(true);
+		inf_set_be(true);
 		break;
 
 	case processor_t::ev_term:

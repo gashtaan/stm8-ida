@@ -231,7 +231,7 @@ void idaapi stm8_segstart(outctx_t &ctx, segment_t *Sarea)
 	{
 		ptr = buf + qsnprintf(buf, sizeof(buf),
 			SCOLOR_ON SCOLOR_ASMDIR "%-*s segment %s ",
-			inf.indent - 1,
+			inf_get_indent() - 1,
 			sname.c_str(),
 			align);
 		if (Sarea->align == saAbs)
@@ -287,7 +287,7 @@ void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v)
 		ctx.out_printf(COLSTR("%-*s", SCOLOR_LOCNAME)
 			COLSTR("= %c", SCOLOR_SYMBOL)
 			COLSTR("%s", SCOLOR_DNUM),
-			inf.indent, name.c_str(), sign, num);
+			inf_get_indent(), name.c_str(), sign, num);
 	}
 }
 
@@ -296,8 +296,8 @@ void idaapi stm8_header(outctx_t &ctx)
 {
 	//D  gen_cmt_line("Processor       : %-8.8s", inf.procName);
 	ctx.gen_header(GH_PRINT_PROC | GH_PRINT_HEADER);
-	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
-	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
+	ctx.gen_cmt_line("Byte Order      : %s", inf_is_be() ? "Big endian" : "Little endian");
+	ctx.gen_cmt_line("Byte Order      : %s", inf_is_be() ? "Big endian" : "Little endian");
 	ctx.gen_empty_line();
 }
 
@@ -305,12 +305,12 @@ void idaapi stm8_header(outctx_t &ctx)
 void idaapi stm8_footer(outctx_t &ctx)
 {
 	qstring name;
-	if (get_colored_name(&name, inf.start_ea) > 0)
+	if (get_colored_name(&name, inf_get_start_ea()) > 0)
 	{
 		if (ash.end == NULL)
-			ctx.gen_printf(inf.indent, COLSTR("%s end %s", SCOLOR_AUTOCMT), ash.cmnt, name.c_str());
+			ctx.gen_printf(inf_get_indent(), COLSTR("%s end %s", SCOLOR_AUTOCMT), ash.cmnt, name.c_str());
 		else
-			ctx.gen_printf(inf.indent, COLSTR("%s", SCOLOR_ASMDIR)
+			ctx.gen_printf(inf_get_indent(), COLSTR("%s", SCOLOR_ASMDIR)
 				" "
 				COLSTR("%s %s", SCOLOR_AUTOCMT), ash.end, ash.cmnt, name.c_str());
 	}

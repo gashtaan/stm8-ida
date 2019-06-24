@@ -1,5 +1,6 @@
 #include "st8.hpp"
 #include <frame.hpp>
+#include <jumptable.hpp>
 
 static int flow;
 //------------------------------------------------------------------------
@@ -147,11 +148,23 @@ ea_t calc_mem(const insn_t &insn, ea_t ea)
 {
 	return to_ea(insn.cs, ea);
 }
-
+//----------------------------------------------------------------------
+static void add_code_xref(const insn_t &insn, const op_t &x, ea_t ea)
+{
+	cref_t ftype = fl_JN;
+	if (has_insn_feature(insn.itype, CF_CALL))
+	{
+		if (!func_does_return(ea))
+			flow = false;
+		ftype = fl_CN;
+	}
+	insn.add_cref(ea, x.offb, ftype);
+}
 //----------------------------------------------------------------------
 static void process_operand(const insn_t &insn, const op_t &x, bool isload)
 {
-	ea_t ea;
+	ea_t ea = insn.ea;
+	flags_t F = get_flags(insn.ea);
 	switch (x.type)
 	{
 	case o_reg:
@@ -161,8 +174,8 @@ static void process_operand(const insn_t &insn, const op_t &x, bool isload)
 	case o_imm:
 		if (!isload) interr(insn, "emu");
 		process_immediate_number(insn, x.n);
-		if (is_off(insn.flags, x.n))
-			insn.add_off_drefs(x, dr_O, 0);
+		if (op_adds_xrefs(F, x.n))
+			insn.add_off_drefs(x, dr_O, OOFS_IFSIGN | OOFW_IMM);
 		break;
 
 	case o_mem:
@@ -176,17 +189,7 @@ static void process_operand(const insn_t &insn, const op_t &x, bool isload)
 		break;
 
 	case o_near:
-		{
-			cref_t ftype = fl_JN;
-			ea = calc_mem(insn, x.addr);
-			if (has_insn_feature(insn.itype, CF_CALL))
-			{
-				if (!func_does_return(ea))
-					flow = false;
-				ftype = fl_CN;
-			}
-			insn.add_cref(ea, x.offb, ftype);
-		}
+		add_code_xref(insn, x, calc_mem(insn, x.addr));		
 		break;
 
 	case o_displ:
@@ -293,20 +296,20 @@ int is_sane_insn(const insn_t &insn, int /*nocrefs*/)
 //     sllw    y             ; y *= sizeof(u16)
 //     ldw     y, (7,y)      ; t = *(7 + y) // data at 7 is changed at runtime
 //     call    (y)           ; Call subroutine
-#include <jptcmn.cpp>
 
 class stm8_jump_pattern_t : public jump_pattern_t
 {
+	enum { rA, rC };
 public:
 	stm8_jump_pattern_t(switch_info_t *si)
-		: jump_pattern_t(si, roots, depends)
+		: jump_pattern_t(si, depends, rC)
 		, indirect_register(-1)
 		, index_register(-1)
 	{
 	}
 
 	static char const roots[];
-	static char const depends[][2];
+	static char const depends[][4];
 
 	int indirect_register;
 	int index_register;
@@ -355,7 +358,7 @@ public:
 };
 
 char const stm8_jump_pattern_t::roots[] = { 1 };
-char const stm8_jump_pattern_t::depends[][2] =
+char const stm8_jump_pattern_t::depends[][4] =
 {
 	{ 1 },    // jp      (x)
 	{ 2 },    // ldw     x, ($F693,x)
