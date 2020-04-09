@@ -409,7 +409,7 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 
 //-----------------------------------------------------------------------
 #define FAMILY "SGS-Thomson STM8:"
-static const char *const shnames[] = { "st8", NULL };
+static const char *const shnames[] = { "stm8", NULL };
 static const char *const lnames[] = {
   FAMILY"SGS-Thomson STM8",
   NULL
