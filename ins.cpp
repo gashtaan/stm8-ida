@@ -1,4 +1,4 @@
-#include "st8.hpp"
+#include "stm8.hpp"
 
 instruc_t Instructions[] = {
 	{ "",           0                               },        // Unknown Operation
