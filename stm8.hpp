@@ -79,6 +79,7 @@ struct opcode_t
 
 //------------------------------------------------------------------
 extern netnode helper;
+extern qstring device;
 
 ea_t calc_mem(const insn_t &insn, ea_t ea);         // map virtual to physical ea
 const ioport_t *find_sym(ea_t address);
