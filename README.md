@@ -67,4 +67,4 @@ Even though ida32 is used to work on 32-bit files, it is also an x64 application
 
       - add to beginning: <IDA SDK dir>\lib\x64_win_vc_32\ida.lib;
   
-      Or use a relative path such as ..\..\lib\x64_win_vc_32\ida.lib;
+      Or use a relative path such as ..\\..\lib\x64_win_vc_32\ida.lib;
