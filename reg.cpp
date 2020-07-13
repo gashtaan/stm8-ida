@@ -421,7 +421,7 @@ static const char *const lnames[] = {
 processor_t LPH =
 {
 	IDP_INTERFACE_VERSION,      // version
-	0x8000,                     // id
+	0x384D5453,                 // id (STM8 in ASCII)
 	PRN_HEX | PR_RNAMESOK,		// flag
 								// flag2
 	PR2_REALCVT					// the module has 'realcvt' event implementation
