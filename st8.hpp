@@ -5,7 +5,7 @@
 
 #pragma warning(disable:4005 4312 4244 4520 4018 4267 4800 4996 4482 4101 4002 4102 4101) 
 
-#include <idaidp.hpp>
+#include "../idaidp.hpp"
 #include <diskio.hpp>
 #include "ins.hpp"
 
