@@ -10,10 +10,8 @@ class out_stm8_t : public outctx_t
 
 public:
 	void outmem(const op_t &x, ea_t ea);
-	//bool outbit(ea_t ea, int bit);
 	bool out_operand(const op_t &x);
 	void out_insn(void);
-	//void out_mnem(void);
 };
 
 DECLARE_OUT_FUNCS_WITHOUT_OUTMNEM(out_stm8_t)
@@ -294,9 +292,7 @@ void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v)
 //--------------------------------------------------------------------------
 void idaapi stm8_header(outctx_t &ctx)
 {
-	//D  gen_cmt_line("Processor       : %-8.8s", inf.procName);
 	ctx.gen_header(GH_PRINT_PROC | GH_PRINT_HEADER);
-	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
 	ctx.gen_cmt_line("Byte Order      : %s", inf.is_be() ? "Big endian" : "Little endian");
 	ctx.gen_empty_line();
 }

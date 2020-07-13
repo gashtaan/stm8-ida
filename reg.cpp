@@ -7,9 +7,9 @@
 //--------------------------------------------------------------------------
 static const char *register_names[] =
 {
-  "a", "x", "y", "cc", "sp",
-  "xl", "xh", "yl", "yh",
-  "ds", "cs",
+	"a", "x", "y", "cc", "sp",
+	"xl", "xh", "yl", "yh",
+	"ds", "cs",
 };
 
 //--------------------------------------------------------------------------
@@ -18,82 +18,80 @@ static uchar retcode1[] = { 0x81 }; // ret   81
 static uchar retcode2[] = { 0x87 }; // retf  87
 static bytes_t retcodes[] =
 {
- { sizeof(retcode0), retcode0 },
- { sizeof(retcode1), retcode1 },
- { sizeof(retcode2), retcode2 },
- { 0, NULL }
+	{ sizeof(retcode0), retcode0 },
+	{ sizeof(retcode1), retcode1 },
+	{ sizeof(retcode2), retcode2 },
+	{ 0, NULL }
 };
-
-static const uint16 cos_bad_insns[] = { ST8_int, 0 }; //casmst8 doesn't support int
 
 static asm_t cosmic =
 {
-  ASH_HEXF3 |    // 0x1234
-  ASD_DECF0 |    // 1234
-  ASB_BINF2 |    // %1010
-  ASO_OCTF3 |    // @1234
-  AS_NOXRF |     // Disable xrefs during the output file generation
-  AS_ONEDUP |    // one array definition per line
-  AS_COLON,      // data labels with colon
-  ASM_COSMIC,	 // uflag,
-  "Cosmic CASTM8",
-  0,
-  NULL,   // header lines
-  "org",        // org
-  "end",        // end
+	ASH_HEXF3 |    // 0x1234
+	ASD_DECF0 |    // 1234
+	ASB_BINF2 |    // %1010
+	ASO_OCTF3 |    // @1234
+	AS_NOXRF |     // Disable xrefs during the output file generation
+	AS_ONEDUP |    // one array definition per line
+	AS_COLON,      // data labels with colon
+	ASM_COSMIC,	 // uflag,
+	"Cosmic CASTM8",
+	0,
+	NULL,   // header lines
+	"org",        // org
+	"end",        // end
 
-  ";",          // comment string
-  '\"',         // string delimiter
-  '\'',         // char delimiter
-  "'\"",        // special symbols in char and string constants
+	";",          // comment string
+	'\"',         // string delimiter
+	'\'',         // char delimiter
+	"'\"",        // special symbols in char and string constants
 
-  // Data representation (db,dw,...):
-  "dc.b",       //   // Data representation (db,dw,...):
-  "dc.b",       // byte directive
-  "dc.w",       // word directive
-  "dc.l",       // double words
-  NULL,         // qwords
-  NULL,         // oword  (16 bytes)
-  "dc.flt",     // float  (4 bytes)	// Fake directive, but float available
-  "dc.dbl",     // double (8 bytes)
-  NULL,         // tbyte  (10/12 bytes)  long double;
-  NULL,         // packed decimal real
-  "dcb.#s(b,w,l) #d, #v", // arrays (#h,#d,#v,#s(...)
-  "ds.b %s",    // uninited arrays
-  "equ",        // equ
-  NULL,         // 'seg' prefix (example: push seg seg001)
-  "*",          // current IP (instruction pointer)
+	// Data representation (db,dw,...):
+	"dc.b",       //   // Data representation (db,dw,...):
+	"dc.b",       // byte directive
+	"dc.w",       // word directive
+	"dc.l",       // double words
+	NULL,         // qwords
+	NULL,         // oword  (16 bytes)
+	"dc.flt",     // float  (4 bytes)	// Fake directive, but float available
+	"dc.dbl",     // double (8 bytes)
+	NULL,         // tbyte  (10/12 bytes)  long double;
+	NULL,         // packed decimal real
+	"dcb.#s(b,w,l) #d, #v", // arrays (#h,#d,#v,#s(...)
+	"ds.b %s",    // uninited arrays
+	"equ",        // equ
+	NULL,         // 'seg' prefix (example: push seg seg001)
+	"*",          // current IP (instruction pointer)
 
-  NULL,         // func_header
-  NULL,         // func_footer
+	NULL,         // func_header
+	NULL,         // func_footer
   
-  "xdef",     // "public" name keyword
-  "wdef",         // "weak"   name keyword
-  "xref",     // "extrn"  name keyword
+	"xdef",     // "public" name keyword
+	"wdef",         // "weak"   name keyword
+	"xref",     // "extrn"  name keyword
 				// .extern directive requires an explicit object size
-  NULL,         // "comm" (communal variable)
+	NULL,         // "comm" (communal variable)
   
-  NULL,         // get_type_name
-  "align",         // "align" keyword
-  '{', '}',     // lbrace, rbrace
-  "%",         // mod
-  "&",        // and
-  "|",         // or
-  "^",        // xor
-  "~",         // not
-  "<<",        // shl
-  ">>",        // shr
-  NULL,         // sizeof
-  AS2_BRACE,
-  NULL, //cmnt2
-  "low(%s)", //low8
-  "high(%s)", //high8
-  NULL, //low16
-  NULL, //high16
-  "include \"%s\"", //include
-  NULL, //verbose struct
-  NULL, //rva
-  NULL, //yword
+	NULL,         // get_type_name
+	"align",         // "align" keyword
+	'{', '}',     // lbrace, rbrace
+	"%",         // mod
+	"&",        // and
+	"|",         // or
+	"^",        // xor
+	"~",         // not
+	"<<",        // shl
+	">>",        // shr
+	NULL,         // sizeof
+	AS2_BRACE,
+	NULL, //cmnt2
+	"low(%s)", //low8
+	"high(%s)", //high8
+	NULL, //low16
+	NULL, //high16
+	"include \"%s\"", //include
+	NULL, //verbose struct
+	NULL, //rva
+	NULL, //yword
 };
 
 //-----------------------------------------------------------------------
@@ -109,59 +107,59 @@ static const char *st8_header[] =
 
 static asm_t stasm =
 {
-  ASH_HEXF4 |    // $1234
-  ASD_DECF0 |    // 1234
-  ASB_BINF2 |    // %1010
-  ASO_OCTF6 |    // ~1234
-  AS_NOXRF |     // Disable xrefs during the output file generation
-  AS_ONEDUP,    // one array definition per line
-  0,
-  "STMicroelectronics - Assembler",
-  0,
-  st8_header,   // header lines
-  "org",        // org
-  "end",        // end
+	ASH_HEXF4 |    // $1234
+	ASD_DECF0 |    // 1234
+	ASB_BINF2 |    // %1010
+	ASO_OCTF6 |    // ~1234
+	AS_NOXRF |     // Disable xrefs during the output file generation
+	AS_ONEDUP,    // one array definition per line
+	0,
+	"STMicroelectronics - Assembler",
+	0,
+	st8_header,   // header lines
+	"org",        // org
+	"end",        // end
 
-  ";",          // comment string
-  '\"',         // string delimiter
-  '\'',         // char delimiter
-  "'\"",        // special symbols in char and string constants
+	";",          // comment string
+	'\"',         // string delimiter
+	'\'',         // char delimiter
+	"'\"",        // special symbols in char and string constants
 
-  // Data representation (db,dw,...):
-  "dc.b",       // ascii string directive
-  "dc.b",       // byte directive
-  "dc.w",       // word directive
-  "dc.l",       // double words
-  NULL,         // qwords
-  NULL,         // oword  (16 bytes)
-  "dc.flt",     // float  (4 bytes)	// Fake directive, but float available
-  "dc.dbl",     // double (8 bytes)
-  NULL,         // tbyte  (10/12 bytes)
-  NULL,         // packed decimal real
-  "skip#s( )#d, #v", // arrays (#h,#d,#v,#s(...)  ONLY BYTE ARRAYS!!!
-  "ds.b %s",    // uninited arrays
-  "equ",        // equ
-  NULL,         // 'seg' prefix (example: push seg seg001)
-  "*",          // current IP (instruction pointer)
-  NULL,         // func_header
-  NULL,         // func_footer
-  "public",     // "public" name keyword
-  NULL,         // "weak"   name keyword
-  "extern",     // "extrn"  name keyword
+	// Data representation (db,dw,...):
+	"dc.b",       // ascii string directive
+	"dc.b",       // byte directive
+	"dc.w",       // word directive
+	"dc.l",       // double words
+	NULL,         // qwords
+	NULL,         // oword  (16 bytes)
+	"dc.flt",     // float  (4 bytes)	// Fake directive, but float available
+	"dc.dbl",     // double (8 bytes)
+	NULL,         // tbyte  (10/12 bytes)
+	NULL,         // packed decimal real
+	"skip#s( )#d, #v", // arrays (#h,#d,#v,#s(...)  ONLY BYTE ARRAYS!!!
+	"ds.b %s",    // uninited arrays
+	"equ",        // equ
+	NULL,         // 'seg' prefix (example: push seg seg001)
+	"*",          // current IP (instruction pointer)
+	NULL,         // func_header
+	NULL,         // func_footer
+	"public",     // "public" name keyword
+	NULL,         // "weak"   name keyword
+	"extern",     // "extrn"  name keyword
 				// .extern directive requires an explicit object size
-  NULL,         // "comm" (communal variable)
-  NULL,         // get_type_name
-  NULL,         // "align" keyword
-  '{', '}',     // lbrace, rbrace
-  NULL,         // mod
-  "and",        // and
-  "or",         // or
-  "xor",        // xor
-  NULL,         // not
-  "shl",        // shl
-  "shr",        // shr
-  NULL,         // sizeof
-  AS2_BRACE,
+	NULL,         // "comm" (communal variable)
+	NULL,         // get_type_name
+	NULL,         // "align" keyword
+	'{', '}',     // lbrace, rbrace
+	NULL,         // mod
+	"and",        // and
+	"or",         // or
+	"xor",        // xor
+	NULL,         // not
+	"shl",        // shl
+	"shr",        // shr
+	NULL,         // sizeof
+	AS2_BRACE,
 };
 
 static asm_t *asms[] = { &stasm, &cosmic, NULL };
@@ -206,8 +204,7 @@ const char * idaapi set_idp_options(const char *keyword, int /*value_type*/, con
 {
 	if (keyword != NULL) 
 		return IDPOPT_BADKEY;
-// 	char cfgfile[QMAXFILE];
-// 	get_cfg_filename(cfgfile, sizeof(cfgfile));
+
 	if (choose_ioport_device(&device, cfgname))
 		load_symbols();// set_device_name(device.c_str(), IORESP_PORT | IORESP_INT);
 	return IDPOPT_OK;
@@ -235,7 +232,7 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 		hook_to_notification_point(HT_IDB, idb_callback);
 		helper.create("$ stm8");
 		helper.supstr(&device, 0);
-		inf.set_be(true);
+		inf.set_be(true); //Use big endian
 		break;
 
 	case processor_t::ev_term:
@@ -245,9 +242,6 @@ static ssize_t idaapi notify(void *, int msgid, va_list va)
 
 	case processor_t::ev_newfile:  // new file loaded
 		{
-// 			char cfgfile[QMAXFILE];
-// 			get_cfg_filename(cfgfile, sizeof(cfgfile));
-
 			if (choose_ioport_device(&device, cfgname))
 				set_device_name(device.c_str(), IORESP_ALL);
 			create_words();
@@ -429,12 +423,12 @@ processor_t LPH =
 	8,                          // 8 bits in a byte for code segments
 	8,                          // 8 bits in a byte for other segments
 
-	shnames,
-	lnames,
+	shnames,                    // Short names
+	lnames,                     // Long names
 
-	asms,
+	asms,                       // Assemblers
 
-	notify,						//Event notification handler
+	notify,						// Event notification handler
 
 	register_names,				// Register names  
 	qnumber(register_names),	// Number of registers
@@ -445,21 +439,21 @@ processor_t LPH =
 	cs, 						// number of CS register
 	ds,							// number of DS register
 
-	NULL,						// codestart 当一个新文件加载时, 用来识别代码开始位置的序列
+	NULL,						// No known code start sequences
 	retcodes,
 
 	ST8_null,					// < icode of the first instruction
 	ST8_last,					// < icode of the last instruction + 1
 	Instructions,
 
-	0,                   // int tbyte_size;  -- doesn't exist
+	0,                          // Don't use tbyte size
 
-	{ 0, 7, 15, 0 },     // char real_width[4];
-						 // number of symbols after decimal point
-						 // 2byte float (0-does not exist)
-						 // normal float
-						 // normal double
-						 // long double
-	ST8_ret,             // Icode of return instruction. It is ok to give any of possible return instructions
+	{				            // char real_width[4] - number of digits after decimal point
+		0,				        // short float (does not exist)
+		7,				        // normal float
+		15,				        // normal double
+		0,				        // long double (does not exist)
+	},
+	ST8_ret,                    // Icode of some return instruction
 
 };

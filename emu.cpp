@@ -84,32 +84,6 @@ static bool get_op_value(
 //----------------------------------------------------------------------
 static void trace_sp(const insn_t &insn)
 {
-/*
-	// @sp++
-	if (insn.Op1.type == o_phrase
-		&& issp(insn.Op1.reg)
-		&& insn.Op1.phtype == ph_post_inc)
-	{
-		ssize_t size = get_dtype_size(insn.Op2.dtype);
-		if (insn.Op2.type == o_reglist)
-			size *= insn.Op2.nregs;
-		add_stkpnt(insn, size);
-		return;
-	}
-
-	// @--sp
-	if (insn.Op2.type == o_phrase
-		&& issp(insn.Op2.reg)
-		&& insn.Op2.phtype == ph_pre_dec)
-	{
-		ssize_t size = get_dtype_size(insn.Op1.dtype);
-		if (insn.Op1.type == o_reglist)
-			size *= insn.Op1.nregs;
-		add_stkpnt(insn, -size);
-		return;
-	}
-*/
-
 	uval_t v;
 	switch (insn.itype)
 	{
@@ -225,7 +199,7 @@ int idaapi emu(const insn_t &insn)
 		process_operand(insn, insn.Op3, false);
 
 	//
-	// 确定是否应该执行下一条指令, 关键, 这里处理不对, 一次只会分析一条指令了
+	// Determine if the next instruction should be executed
 	//
 	if (segtype(insn.ea) == SEG_XTRN) 
 		flow = 0;
