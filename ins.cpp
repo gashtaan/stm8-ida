@@ -108,7 +108,7 @@ instruc_t Instructions[] = {
 	{ "wfe",        0                               },        // Wait for Event
 	{ "wfi",        0                               },        // Wait for Interrupt
 	{ "xor",        CF_CHG1|CF_USE1|CF_USE2         },        // Exclusive OR
-	{ "unknown",    0                               },        // UNKNOWN 0x71 instruction
+	{ "illegal",    CF_STOP                         },        // Illegal 0x71 instruction
 };
 
 const char *insn_auto_cmts[] = {
@@ -218,7 +218,7 @@ const char *insn_auto_cmts[] = {
 	"Wait for Event",
 	"Wait for Interrupt",
 	"Exclusive OR",
-	"UNKNOWN 0x71 instruction",
+	"Illegal 0x71 instruction",
 };
 
 CASSERT(qnumber(Instructions) == ST8_last);
