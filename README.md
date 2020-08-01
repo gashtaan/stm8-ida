@@ -2,6 +2,17 @@
 STM8 IDA processor module for STMicroelectronics' STM8 series of microcontrollers.
 Known working on IDA 7.2 and known to compile with Visual C++ 2019 and the IDA 7.2 SDK.
 
+## Known issues
+1. Autocomments spam the output window with a warning:
+
+    ```
+    Exception in IDP Hook function: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
+    TypeError: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
+    ```
+    I don't know how to fix this.
+
+2. No stack variable tracing :(
+
 ## Visual Studio Building Instructions
 
 1. Place this repo in a folder in idasdk/module/
@@ -21,6 +32,7 @@ Known working on IDA 7.2 and known to compile with Visual C++ 2019 and the IDA 7
 5. Copy the output file /x64/Debug/stm8.dll to your IDA proc directory
 6. Copy the STM8 config file stm8.cfg to your IDA cfg directory
 7. Start IDA :)
+8. The processor type is "STMicroelectronics STM8"
 
 ## Visual Studio 2019 Project Creation Instructions
 
@@ -61,10 +73,10 @@ Even though ida32 is used to work on 32-bit files, it is also an x64 application
 
 9. C/C++ > Preprocessor > Preprocessor Definitions
 
-      - add to beginning: __NT__;
+     Add to beginning: __NT__;
 
 10. Linker > Input > Additional Dependencies
 
-      - add to beginning: <IDA SDK dir>\lib\x64_win_vc_32\ida.lib;
+     Add to beginning: <IDA SDK dir>\lib\x64_win_vc_32\ida.lib;
   
-      Or use a relative path such as ..\\..\lib\x64_win_vc_32\ida.lib;
+     Or use a relative path such as ..\\..\lib\x64_win_vc_32\ida.lib;
