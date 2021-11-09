@@ -1,19 +1,20 @@
 # STM8-IDA
+
 STM8 IDA processor module for STMicroelectronics' STM8 series of microcontrollers.
-Known working on IDA 7.2 and known to compile with Visual C++ 2019 and the IDA 7.2 SDK.
+Known working on IDA 7.6 and the IDA 7.6 SDK.
 
-## Known issues
-1. Autocomments spam the output window with a warning:
+## Installation & Building Instructions
 
-    ```
-    Exception in IDP Hook function: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
-    TypeError: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
-    ```
-    I don't know how to fix this.
+### Linux
 
-2. No stack variable tracing :(
+1. Get the IDA SDK from https://www.hex-rays.com/products/ida/support/download/
+2. Move this directory to `$SDKDIR/modules/` (yes, move, symlinks won’t work)
+3. Run `make`
+4. Run `sudo make install`
+5. The processor type `STMicroelectronics STM8"` should now show up in IDA.
 
-## Visual Studio Building Instructions
+
+### Visual Studio Building Instructions
 
 1. Place this repo in a folder in idasdk/module/
 
@@ -34,9 +35,9 @@ Known working on IDA 7.2 and known to compile with Visual C++ 2019 and the IDA 7
 7. Start IDA :)
 8. The processor type is "STMicroelectronics STM8"
 
-## Visual Studio 2019 Project Creation Instructions
+### Visual Studio 2019 Project Creation Instructions
 
-### For IDA 7.2 SDK
+#### For IDA 7.2 SDK
 
 Even though ida32 is used to work on 32-bit files, it is also an x64 application. Therefore, ida32 plugins must be built for the x64 platform.
 
@@ -80,3 +81,15 @@ Even though ida32 is used to work on 32-bit files, it is also an x64 application
      Add to beginning: <IDA SDK dir>\lib\x64_win_vc_32\ida.lib;
   
      Or use a relative path such as ..\\..\lib\x64_win_vc_32\ida.lib;
+
+## Known issues
+
+1. Autocomments spam the output window with a warning:
+
+    ```
+    Exception in IDP Hook function: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
+    TypeError: SWIG director type mismatch in output value of type 'int' in method 'ev_get_autocmt'
+    ```
+    I don't know how to fix this.
+
+2. No stack variable tracing :(
