@@ -1158,7 +1158,7 @@ int idaapi ana(insn_t *_insn)
 void interr(const insn_t &insn, const char *module)
 {
 	const char *name = NULL;
-	if ( insn.itype < ph.instruc_end )
+	if ( insn.itype < get_ph()->instruc_end )
 		name = Instructions[insn.itype].name;
 
 	warning("%a(%s): internal error in %s", insn.ea, name, module);

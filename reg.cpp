@@ -165,13 +165,11 @@ static asm_t stasm =
 static asm_t *asms[] = { &stasm, &cosmic, NULL };
 
 //--------------------------------------------------------------------------
+int data_id;
 ea_t memstart;
-static netnode helper;
 qstring device;
 static ioports_t ports;
 static const char cfgname[] = "stm8.cfg";
-
-#include "../iocommon.cpp"
 
 //
 static void load_symbols(void)
@@ -179,6 +177,7 @@ static void load_symbols(void)
 	ports.clear();
 	read_ioports(&ports, &device, cfgname);
  }
+ 
 //
 //----------------------------------------------------------------------
 const ioport_t *find_sym(ea_t address)
@@ -210,50 +209,55 @@ const char * idaapi set_idp_options(const char *keyword, int /*value_type*/, con
 	return IDPOPT_OK;
 }
 
-static ssize_t idaapi idb_callback(void *, int code, va_list /*va*/)
+ssize_t idaapi idb_listener_t::on_event(ssize_t code, va_list)
 {
 	switch (code)
 	{
 	case idb_event::closebase:
 	case idb_event::savebase:
-		helper.supset(0, device.c_str());
+		pm.helper.supset(0, device.c_str());
 		break;
 	}
 	return 0;
 }
+
+//----------------------------------------------------------------------
+// This old-style callback only returns the processor module object.
+static ssize_t idaapi notify(void *, int msgid, va_list)
+{
+  if ( msgid == processor_t::ev_get_procmod )
+    return size_t(SET_MODULE_DATA(stm8_t));
+  return 0;
+}
+
 //--------------------------------------------------------------------------
-static ssize_t idaapi notify(void *, int msgid, va_list va)
+ssize_t idaapi stm8_t::on_event(ssize_t msgid, va_list va)
 {
 	int retcode = 0;
 
 	switch (msgid)
 	{
 	case processor_t::ev_init:
-		hook_to_notification_point(HT_IDB, idb_callback);
+	 	hook_event_listener(HT_IDB, &idb_listener, &LPH);
 		helper.create("$ stm8");
 		helper.supstr(&device, 0);
-		inf.set_be(true); //Use big endian
+		inf_set_be(true); //Use big endian
 		break;
 
 	case processor_t::ev_term:
 		ports.clear();
-		unhook_from_notification_point(HT_IDB, idb_callback);
+		unhook_event_listener(HT_IDB, &idb_listener);
 		break;
 
 	case processor_t::ev_newfile:  // new file loaded
-		{
-			if (choose_ioport_device(&device, cfgname))
-				set_device_name(device.c_str(), IORESP_ALL);
-			create_words();
+		if (choose_ioport_device(&ioh.device, cfgname)) {
+			ioh.set_device_name(device.c_str(), IORESP_ALL);
 		}
+		create_words();
 		break;
 
 	case processor_t::ev_oldfile:  // old file loaded
-		{
-			char buf[MAXSTR];
-			if (helper.supval(-1, buf, sizeof(buf)) > 0)
-				set_device_name(buf, IORESP_NONE);
-		}
+		ioh.restore_device();
 		break;
 
 	case processor_t::ev_is_jump_func:

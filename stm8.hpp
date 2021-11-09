@@ -8,6 +8,7 @@
 #include "../idaidp.hpp"
 #include <diskio.hpp>
 #include "ins.hpp"
+#include "../iohandler.hpp"
 
 // o_void  Inherent      nop
 // o_imm   Immediate     ld A,#$55
@@ -78,7 +79,6 @@ struct opcode_t
 };
 
 //------------------------------------------------------------------
-extern netnode helper;
 extern qstring device;
 
 ea_t calc_mem(const insn_t &insn, ea_t ea);         // map virtual to physical ea
@@ -86,10 +86,6 @@ const ioport_t *find_sym(ea_t address);
 const struct opcode_t &get_opcode_info(uint8 opcode);
 //------------------------------------------------------------------
 void interr(const insn_t &insn, const char *module);
-void idaapi stm8_header(outctx_t &ctx);
-void idaapi stm8_footer(outctx_t &ctx);
-void idaapi stm8_segstart(outctx_t &ctx, segment_t *Sarea);
-void idaapi stm8_segend(outctx_t &ctx, segment_t *seg);
 int idaapi stm8_is_align_insn(ea_t ea);
 void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v);
 int  idaapi ana(insn_t *_insn);
@@ -100,5 +96,25 @@ int is_sane_insn(const insn_t &insn, int nocrefs);
 int get_frame_retsize(func_t *);
 int is_jump_func(const func_t *pfn, ea_t *jump_target);
 int may_be_func(void);           // can a function start here?
+
+DECLARE_PROC_LISTENER(idb_listener_t, struct stm8_t);
+
+struct stm8_t : public procmod_t
+{
+  idb_listener_t idb_listener = idb_listener_t(*this);
+  netnode helper;
+  iohandler_t ioh = iohandler_t(helper);
+
+  virtual ssize_t idaapi on_event(ssize_t msgid, va_list va) override;
+
+  void stm8_header(outctx_t &ctx);
+  void handle_operand(const op_t &x, bool forced_op, bool isload, const insn_t &insn);
+  void stm8_segstart(outctx_t &ctx, segment_t *Sarea) const;
+  void stm8_segend(outctx_t &ctx, segment_t *seg) const;
+  void stm8_footer(outctx_t &ctx) const;
+
+  void load_from_idb();
+};
+#define PROCMOD_NAME stm8
 
 #endif // _ST8_HPP

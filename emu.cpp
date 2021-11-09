@@ -181,7 +181,7 @@ static void process_operand(const insn_t &insn, const op_t &x, bool isload)
 //----------------------------------------------------------------------
 int idaapi emu(const insn_t &insn)
 {
-	uint32 Feature = insn.get_canon_feature();
+	uint32 Feature = insn.get_canon_feature(*get_ph());
 
 	flow = ((Feature & CF_STOP) == 0);
 
