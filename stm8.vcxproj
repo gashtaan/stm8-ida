@@ -98,7 +98,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__NT__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
