@@ -298,7 +298,7 @@ ssize_t idaapi stm8_t::on_event(ssize_t msgid, va_list va)
 	case processor_t::ev_gen_stkvar_def:
 		{
 			outctx_t *ctx = va_arg(va, outctx_t *);
-			const ::member_t * memt = va_arg(va, const ::member_t *);
+			const ::udm_t * memt = va_arg(va, const ::udm_t *);
 			sval_t v = va_arg(va, sval_t);
 
 			stm8_gen_stkvar_def(*ctx, memt, v);
@@ -422,8 +422,7 @@ processor_t LPH =
 	0x384D5453,                 // id (STM8 in ASCII)
 	PRN_HEX | PR_RNAMESOK,		// flag
 								// flag2
-	PR2_REALCVT					// the module has 'realcvt' event implementation
-  | PR2_IDP_OPTS,				// the module has processor-specific configuration options
+	PR2_IDP_OPTS,				// the module has processor-specific configuration options
 	8,                          // 8 bits in a byte for code segments
 	8,                          // 8 bits in a byte for other segments
 

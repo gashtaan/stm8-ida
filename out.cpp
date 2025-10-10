@@ -1,5 +1,5 @@
 #include "stm8.hpp"
-#include <struct.hpp>
+#include <typeinf.hpp>
 #include <kernwin.hpp>
 
 
@@ -259,7 +259,7 @@ void stm8_t::stm8_segend(outctx_t &ctx, segment_t *seg) const
 
 //--------------------------------------------------------------------------
 //  Generate stack variable definition line
-void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v)
+void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const udm_t *mptr, sval_t v)
 {
 	char sign = ' ';
 	if (v < 0)
@@ -270,7 +270,7 @@ void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v)
 	char num[MAX_NUMBUF];
 	btoa(num, sizeof(num), v);
 
-	qstring name = get_member_name(mptr->id);
+	qstring name = mptr->name;
 	if (ctx.ash.uflag == ASM_COSMIC)
 	{
 		ctx.out_printf(COLSTR("%s", SCOLOR_LOCNAME)
