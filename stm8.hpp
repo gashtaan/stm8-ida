@@ -87,7 +87,7 @@ const struct opcode_t &get_opcode_info(uint8 opcode);
 //------------------------------------------------------------------
 void interr(const insn_t &insn, const char *module);
 int idaapi stm8_is_align_insn(ea_t ea);
-void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const member_t *mptr, sval_t v);
+void idaapi stm8_gen_stkvar_def(outctx_t &ctx, const udm_t *mptr, sval_t v);
 int  idaapi ana(insn_t *_insn);
 int  idaapi emu(const insn_t &insn);
 bool idaapi stm8_is_switch(switch_info_t *si, const insn_t &insn);
