@@ -795,7 +795,7 @@ inline void oprel(insn_t &insn, op_t &x)
 inline void opreg(insn_t &insn, op_t &x, int reg)
 {
   x.type = o_reg;
-  x.dtype = dt_byte;
+  x.dtype = (reg == F_REGX || reg == F_REGY || reg == F_REGSP) ? dt_word : dt_byte;
   x.reg  = reg;
 }
 
