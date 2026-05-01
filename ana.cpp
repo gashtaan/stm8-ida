@@ -774,7 +774,7 @@ inline void opaddr(insn_t &insn, op_t &x, char dtyp)
   uint32 value = ReadU16(insn);
   x.type = o_near;
   x.dtype = dtyp;
-  x.addr = value;
+  x.addr = (insn.ip & 0xFFFF0000) + value;
 }
 inline void opimm(insn_t &insn, op_t &x, uint32 value, char dtyp)
 {
