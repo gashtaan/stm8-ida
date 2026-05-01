@@ -87,7 +87,6 @@ static void trace_sp(const insn_t &insn)
 	uval_t v;
 	switch (insn.itype)
 	{
-
 	case ST8_add:
 	case ST8_addw:
 		if (!issp(insn.Op1.reg))
@@ -103,14 +102,10 @@ static void trace_sp(const insn_t &insn)
 			add_stkpnt(insn, 0 - v);
 		break;
 	case ST8_push:
-		add_stkpnt(insn, 0 - get_dtype_size(insn.Op1.dtype));
-		break;
 	case ST8_pushw:
 		add_stkpnt(insn, 0 - get_dtype_size(insn.Op1.dtype));
 		break;
 	case ST8_pop:
-		add_stkpnt(insn, get_dtype_size(insn.Op1.dtype));
-		break;
 	case ST8_popw:
 		add_stkpnt(insn, get_dtype_size(insn.Op1.dtype));
 		break;
@@ -208,13 +203,13 @@ int idaapi emu(const insn_t &insn)
 
 	//
 	// Handle SP modifications
-// 	if (may_trace_sp())
-// 	{
-// 		if (!flow)
-// 			recalc_spd(insn.ea);     // recalculate SP register for the next insn
-// 		else
-// 			trace_sp(insn);
-// 	}
+	if (may_trace_sp())
+	{
+		if (!flow)
+			recalc_spd(insn.ea);     // recalculate SP register for the next insn
+		else
+			trace_sp(insn);
+	}
 
 	return 1;
 }
