@@ -11,8 +11,8 @@ instruc_t Instructions[] = {
 	{ "bcp",        CF_USE1|CF_USE2                 },        // Bit compare
 	{ "bcpl",       CF_USE1|CF_USE2                 },        // Bit complement
 	{ "break",      0                               },        // Software breakpoint
-	{ "bres",       CF_CHG1|CF_USE1                 },        // Bit Reset
-	{ "bset",       CF_CHG1|CF_USE1                 },        // Bit Set
+	{ "bres",       CF_CHG1|CF_USE1|CF_USE2         },        // Bit Reset
+	{ "bset",       CF_CHG1|CF_USE1|CF_USE2         },        // Bit Set
 	{ "btjf",       CF_USE1|CF_USE2|CF_USE3         },        // Jump if bit is false
 	{ "btjt",       CF_USE1|CF_USE2|CF_USE3         },        // Jump if bit is true
 	{ "call",       CF_USE1|CF_CALL                 },        // Call subroutine
