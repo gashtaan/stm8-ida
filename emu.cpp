@@ -7,16 +7,6 @@ static int flow;
 static void process_immediate_number(const insn_t &insn, int n)
 {
 	set_immd(insn.ea);
-	if (is_defarg(insn.flags, n)) return;
-	switch (insn.itype)
-	{
-	case ST8_bres:
-	case ST8_bset:
-	case ST8_btjf:
-	case ST8_btjt:
-		op_dec(insn.ea, n);
-		break;
-	}
 }
 
 //----------------------------------------------------------------------
